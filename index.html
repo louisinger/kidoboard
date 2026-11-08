@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kidoboard</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; user-select: none; cursor: none; }
+  body { font-family: "Arial Rounded MT Bold", system-ui, sans-serif; background: #14142b; color: #fff; transition: background 0.5s; display: grid; place-items: center; }
+  #stage { display: grid; place-items: center; gap: 2vmin; text-align: center; }
+  #emoji { font-size: 50vmin; line-height: 1.1; }
+  #word { font-size: 14vmin; font-weight: 900; text-shadow: 0 0.4vmin 1vmin rgba(0,0,0,.35); }
+  .pop { animation: pop .7s cubic-bezier(.3,1.6,.5,1); }
+  @keyframes pop { from { transform: scale(0) rotate(-20deg); } }
+  .pulse { animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform: scale(1.15); } }
+  .ask { filter: grayscale(1) brightness(.6); }
+  .wiggle { animation: wiggle .3s; }
+  @keyframes wiggle { 25% { translate: -3vmin 0; } 75% { translate: 3vmin 0; } }
+  #keys { position: fixed; bottom: 3vmin; left: 50%; translate: -50% 0; display: none; flex-direction: column; gap: .6vmin; }
+  #keys div { display: flex; gap: .6vmin; justify-content: center; }
+  #keys span { width: 5vmin; height: 5vmin; border-radius: 1vmin; background: rgba(255,255,255,.25); display: grid; place-items: center; font-size: 3.4vmin; }
+  #keys .target { background: #fff; box-shadow: 0 0 3vmin #fff; animation: pulse .8s ease-in-out infinite; }
+  #mode { position: fixed; top: 2vmin; right: 2vmin; font-size: 4vmin; opacity: .35; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="emoji" class="pulse">⌨️</div><div id="word"></div></div>
+<div id="keys"></div>
+<div id="mode" title="free play / find the animal">🎲</div>
+<script>
+// ---- content: a key is always the same animal or colour, so a small kid can learn where "the cow" lives ----
+
+const FR = navigator.language.startsWith('fr');
+const ROWS = [
+  ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'],
+  ['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP'],
+  ['KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL'],
+  ['KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM'],
+];
+// [emoji, english name, english sound, french name, french sound]
+const ANIMALS = [
+  ['🐮', 'cow', 'moo', 'la vache', 'meuh'], ['🐱', 'cat', 'meow', 'le chat', 'miaou'], ['🐶', 'dog', 'woof woof', 'le chien', 'ouaf ouaf'],
+  ['🦆', 'duck', 'quack quack', 'le canard', 'coin coin'], ['🐷', 'pig', 'oink oink', 'le cochon', 'groin groin'], ['🐑', 'sheep', 'baa', 'le mouton', 'bêê'],
+  ['🐴', 'horse', 'neigh', 'le cheval', 'hiii'], ['🦁', 'lion', 'roar', 'le lion', 'roar'], ['🐸', 'frog', 'ribbit', 'la grenouille', 'croa croa'],
+  ['🐦', 'bird', 'tweet tweet', "l'oiseau", 'cui cui'], ['🐔', 'chicken', 'cluck cluck', 'la poule', 'cot cot'], ['🦉', 'owl', 'hoo hoo', 'le hibou', 'hou hou'],
+  ['🐝', 'bee', 'bzzz', "l'abeille", 'bzzz'], ['🐭', 'mouse', 'squeak', 'la souris', 'piip piip'], ['🐵', 'monkey', 'ooh ooh ah ah', 'le singe', 'ouh ouh ah ah'],
+  ['🐘', 'elephant', 'toot', "l'éléphant", 'baraa'], ['🐟', 'fish', 'blub blub', 'le poisson', 'bloup bloup'], ['🐍', 'snake', 'sssss', 'le serpent', 'sssss'],
+  ['🐻', 'bear', 'grrr', "l'ours", 'grrr'], ['🐺', 'wolf', 'awooo', 'le loup', 'aouuu'], ['🐰', 'rabbit', 'hop hop', 'le lapin', 'hop hop'],
+  ['🐢', 'turtle', 'slow slow', 'la tortue', 'doucement'], ['🐯', 'tiger', 'grrr', 'le tigre', 'grrr'], ['🐐', 'goat', 'maa', 'la chèvre', 'bêê'],
+  ['🐓', 'rooster', 'cock-a-doodle-doo', 'le coq', 'cocorico'], ['🐧', 'penguin', 'wak wak', 'le pingouin', 'wak wak'],
+];
+// [emoji, css colour, english, french, text colour on that background]
+const COLORS = [
+  ['🔴', '#e53935', 'red', 'rouge'], ['🔵', '#1e88e5', 'blue', 'bleu'], ['🟡', '#fdd835', 'yellow', 'jaune', '#333'],
+  ['🟢', '#43a047', 'green', 'vert'], ['🟠', '#fb8c00', 'orange', 'orange'], ['🟣', '#8e24aa', 'purple', 'violet'],
+  ['🩷', '#f06292', 'pink', 'rose'], ['🟤', '#6d4c41', 'brown', 'marron'], ['⚫', '#111111', 'black', 'noir'], ['⚪', '#f5f5f5', 'white', 'blanc', '#333'],
+];
+const BG = ['#e53935', '#1e88e5', '#43a047', '#fb8c00', '#8e24aa', '#00897b', '#f06292']; // backgrounds for animals, rotating
+
+function keyInfo(code) {
+  const r = ROWS.findIndex(row => row.includes(code));
+  if (r < 0) return null;
+  const c = ROWS[r].indexOf(code);
+  if (r === 0) {
+    const [emoji, bg, en, fr, fg = '#fff'] = COLORS[c];
+    return { code, emoji, bg, fg, name: FR ? fr : en, sound: '' };
+  }
+  const n = ROWS.slice(1, r).reduce((a, row) => a + row.length, 0) + c;
+  const [emoji, en, enSound, fr, frSound] = ANIMALS[n];
+  return { code, emoji, bg: BG[n % BG.length], fg: '#fff', name: FR ? fr : en, sound: FR ? frSound : enSound };
+}
+
+// One press, one thing: while something is on stage, extra presses are ignored. That is what turns smashing into pressing.
+const STAGE_MS = 1500;
+const accept = (now, last) => now - last >= STAGE_MS;
+
+// ---- sound: a soft chime per press, the browser voice for names ----
+
+let ctx;
+function chime(freq, dur = 0.5) {
+  ctx ??= new AudioContext();
+  if (ctx.state === 'suspended') ctx.resume();
+  const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'triangle';
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0.4, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(ctx.destination);
+  o.start(t);
+  o.stop(t + dur);
+}
+const PENTA = [523, 587, 659, 784, 880];
+const tick = () => chime(1200, 0.08);
+const cheer = () => PENTA.forEach((f, i) => setTimeout(() => chime(f * 2, 0.4), i * 90));
+
+// ponytail: browser voice, quality varies by OS; recorded clips if it sounds bad
+function say(...texts) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  for (const text of texts.filter(Boolean)) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = FR ? 'fr-FR' : 'en-US';
+    u.rate = 0.85;
+    speechSynthesis.speak(u);
+  }
+}
+
+// ---- stage ----
+
+const $ = id => document.getElementById(id);
+function show(info, { quiet = false } = {}) {
+  document.body.style.background = info.bg;
+  document.body.style.color = info.fg;
+  $('emoji').className = 'pop';
+  $('emoji').textContent = info.emoji;
+  $('word').textContent = info.name;
+  $('emoji').getAnimations().forEach(a => { a.cancel(); a.play(); });
+  if (!quiet) say(info.name, info.sound);
+}
+
+// ---- find mode: "where is the cow?" with the key glowing on a little keyboard ----
+
+let finding = false, target = null;
+$('keys').append(...ROWS.map(row => {
+  const div = document.createElement('div');
+  div.append(...row.map(code => Object.assign(document.createElement('span'), { id: code, textContent: keyInfo(code).emoji })));
+  return div;
+}));
+
+function ask() {
+  const all = ROWS.flat().filter(code => code !== target?.code);
+  target = keyInfo(all[Math.floor(Math.random() * all.length)]);
+  document.querySelectorAll('#keys .target').forEach(el => el.classList.remove('target'));
+  $(target.code).classList.add('target');
+  document.body.style.background = '#14142b';
+  document.body.style.color = '#fff';
+  $('emoji').className = 'ask pulse';
+  $('emoji').textContent = target.emoji;
+  $('word').textContent = '?';
+  say(FR ? `Où est ${target.name} ?` : `Where is the ${target.name}?`);
+}
+
+function setMode(find) {
+  finding = find;
+  $('mode').textContent = find ? '🔍' : '🎲';
+  $('keys').style.display = find ? 'flex' : 'none';
+  try { localStorage.mode = find ? 'find' : 'free'; } catch {}
+  if (find) ask(); else { target = null; show({ emoji: '⌨️', name: '', bg: '#14142b', fg: '#fff' }, { quiet: true }); }
+}
+$('mode').onclick = () => setMode(!finding);
+
+// ---- input ----
+
+let started = false, last = -Infinity, lastInfo = null;
+function start() {
+  if (started) return;
+  started = true;
+  // Fullscreen + (Chrome/Edge) keyboard lock keep small hands inside the page.
+  Promise.resolve(document.documentElement.requestFullscreen?.()).then(() => navigator.keyboard?.lock?.()).catch(() => {});
+}
+
+function press(code, now) {
+  if (!accept(now, last)) return;
+  last = now;
+  const info = code === 'Space' ? lastInfo : keyInfo(code);
+  if (!info) { tick(); return; }
+  if (finding && info.code !== target.code) {
+    // a wrong key still teaches: say what it was, keep the question open
+    chime(PENTA[0]);
+    $(info.code).textContent = info.emoji;
+    $('emoji').classList.add('wiggle');
+    setTimeout(() => $('emoji').classList.remove('wiggle'), 300);
+    say(info.name);
+    return;
+  }
+  lastInfo = info;
+  if (finding) {
+    cheer();
+    show(info, { quiet: true });
+    say(FR ? 'Bravo !' : 'Yes!', info.name, info.sound);
+    last = now + 1500; // a longer stage for the celebration
+    setTimeout(ask, STAGE_MS + 1500);
+  } else {
+    chime(PENTA[ROWS.flat().indexOf(info.code) % PENTA.length]);
+    show(info);
+  }
+}
+
+addEventListener('keydown', e => {
+  e.preventDefault(); // swallow tab, space-scroll, backspace, F-keys…
+  if (e.repeat || e.metaKey || e.ctrlKey) return; // a held key is one press; leave shortcuts to the parent
+  start();
+  press(e.code, performance.now());
+});
+
+addEventListener('beforeunload', e => {
+  if (!started) return;
+  e.preventDefault();
+  e.returnValue = '';
+});
+
+try { if (localStorage.mode === 'find') setMode(true); } catch {}
+
+// ---- self-check: open index.html#test ----
+
+if (location.hash === '#test') {
+  let failed = 0;
+  const ok = (cond, msg) => { if (!cond) { failed++; console.error('FAIL', msg); } };
+  const letters = ROWS.slice(1).flat(), seen = new Set();
+  ok(letters.length === ANIMALS.length, 'one animal per letter key');
+  ok(ROWS[0].length === COLORS.length, 'one colour per digit key');
+  for (const code of ROWS.flat()) {
+    const k = keyInfo(code);
+    ok(k && k.emoji && k.name && k.bg, `${code} has an emoji, a name and a colour`);
+    ok(!seen.has(k.emoji), `${code} has its own emoji`);
+    seen.add(k.emoji);
+    ok(JSON.stringify(k) === JSON.stringify(keyInfo(code)), `${code} is stable`);
+  }
+  ok(ROWS[0].every(code => keyInfo(code).sound === ''), 'colours have no animal sound');
+  ok(letters.every(code => keyInfo(code).sound), 'animals have a sound');
+  for (const code of ['Space', 'Enter', 'ArrowUp', 'Backquote', 'F5', '']) ok(keyInfo(code) === null, `${code} is not a toy key`);
+  ok(accept(0, -Infinity) && accept(STAGE_MS, 0) && !accept(STAGE_MS - 1, 0), 'one press per stage');
+  ok(document.querySelectorAll('#keys span').length === ROWS.flat().length, 'mini keyboard has every toy key');
+  document.title = failed ? `${failed} FAILED` : 'tests ok';
+  $('emoji').textContent = failed ? '❌' : '✅';
+}
+</script>
+</body>
+</html>
