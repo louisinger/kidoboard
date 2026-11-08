@@ -14,7 +14,8 @@
   @keyframes pop { from { transform: scale(0) rotate(-20deg); } }
   .pulse { animation: pulse 1.2s ease-in-out infinite; }
   @keyframes pulse { 50% { transform: scale(1.15); } }
-  .ask { filter: grayscale(1) brightness(.6); }
+  body.finding #emoji { font-size: 28vmin; }
+  body.finding #stage { padding-bottom: 26vmin; }
   .wiggle { animation: wiggle .3s; }
   @keyframes wiggle { 25% { translate: -3vmin 0; } 75% { translate: 3vmin 0; } }
   #keys { position: fixed; bottom: 3vmin; left: 50%; translate: -50% 0; display: none; flex-direction: column; gap: .6vmin; }
@@ -135,7 +136,7 @@ function ask() {
   $(target.code).classList.add('target');
   document.body.style.background = '#14142b';
   document.body.style.color = '#fff';
-  $('emoji').className = 'ask pulse';
+  $('emoji').className = 'pulse';
   $('emoji').textContent = target.emoji;
   $('word').textContent = '?';
   say(FR ? `Où est ${target.name} ?` : `Where is the ${target.name}?`);
@@ -145,6 +146,7 @@ function setMode(find) {
   finding = find;
   $('mode').textContent = find ? '🔍' : '🎲';
   $('keys').style.display = find ? 'flex' : 'none';
+  document.body.classList.toggle('finding', find);
   try { localStorage.mode = find ? 'find' : 'free'; } catch {}
   if (find) ask(); else { target = null; show({ emoji: '⌨️', name: '', bg: '#14142b', fg: '#fff' }, { quiet: true }); }
 }
