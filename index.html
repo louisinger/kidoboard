@@ -127,8 +127,8 @@ const $ = id => document.getElementById(id);
 function stage(info) {
   document.body.style.background = info.bg;
   document.body.style.color = info.fg;
-  $('emoji').style.display = info.img ? 'none' : '';
-  $('photo').style.display = info.img ? '' : 'none';
+  $('emoji').style.display = info.img ? 'none' : 'block';
+  $('photo').style.display = info.img ? 'block' : 'none';
   $('emoji').textContent = info.emoji;
   if (info.img) $('photo').src = info.img;
   $('word').textContent = info.name;
