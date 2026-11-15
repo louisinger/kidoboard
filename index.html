@@ -28,20 +28,21 @@
   .logo { display: flex; gap: clamp(4px, .9vw, 10px); margin: 0 0 20px; }
   .logo .cap { --d: clamp(4px, .8vw, 8px); width: clamp(30px, 7.6vw, 82px); aspect-ratio: 1; border-radius: 24%; display: grid; place-items: center;
                font-size: clamp(18px, 4.4vw, 48px); font-weight: 900; user-select: none; }
-  .tag { margin: 0; max-width: 34ch; font-size: clamp(18px, 2.2vw, 26px); font-weight: 700; line-height: 1.25; }
+  .tag { margin: 0 0 18px; max-width: 36ch; font-size: clamp(18px, 2.2vw, 26px); font-weight: 700; line-height: 1.25; }
   .track { margin-top: clamp(28px, 4vw, 44px); }
   .track h2 { margin: 0; font-size: clamp(22px, 2.6vw, 32px); font-weight: 900; }
-  .track p, .track li { max-width: 64ch; font-size: 17px; font-weight: 600; line-height: 1.4; }
+  .track h3 { margin: 22px 0 0; font-size: 20px; font-weight: 900; }
+  .track p, .track li { max-width: 66ch; font-size: 17px; font-weight: 600; line-height: 1.4; }
   .track > p { margin: 4px 0 14px; }
-  .track ul { margin: 6px 0 18px; padding-left: 1.2em; }
-  .track li { margin: 4px 0; }
+  .track ul, .track ol { margin: 6px 0 18px; padding-left: 1.3em; }
+  .track li { margin: 5px 0; }
+  .track small { font-size: 14px; font-weight: 700; opacity: .8; }
   .seg { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 18px; font-size: 16px; font-weight: 800; }
   .seg .cap, .tools .cap { --d: 5px; padding: 9px 16px; border-radius: 13px; font-size: 15px; font-weight: 800; }
   .seg .cap[aria-pressed=true] { --c: var(--ink); color: #fff; transform: translateY(3px); box-shadow: 0 2px 0 #000; }
-  .row { display: grid; gap: 18px; padding-bottom: 12px; }
-  .row.kb { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .row.ms { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; padding-bottom: 12px; }
   .go { --d: 12px; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto 1fr auto; gap: 4px 12px; padding: 18px 20px 16px; border-radius: 28px; color: #fff; text-align: left; }
+  .go.later { opacity: .6; filter: saturate(.6); }  /* for an older child; still playable */
   .go .num { font-size: 22px; font-weight: 900; }
   .go .num em { margin-left: 8px; padding: 3px 10px; border-radius: 99px; background: rgba(255, 255, 255, .24); font-size: 13px; font-style: normal; font-weight: 800; vertical-align: 3px; white-space: nowrap; }
   .go svg { grid-row: 1 / 3; grid-column: 2; width: clamp(52px, 6vw, 76px); }
@@ -53,10 +54,11 @@
   .prog i.on { background: #fff; }
   .ico { fill: none; stroke: currentColor; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
   .ico .f { fill: currentColor; }
+  .ico text { fill: currentColor; stroke: none; font-weight: 900; font-size: 30px; text-anchor: middle; }
   .tools { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 16px; padding-bottom: 8px; }
   .tools a { color: inherit; font-weight: 800; }
-  @media (max-width: 900px) { .row.kb { grid-template-columns: 1fr; } .row.ms { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (max-width: 560px) { .row.ms { grid-template-columns: 1fr; } .go { padding: 14px 14px 12px; border-radius: 22px; } .go .sub { font-size: 15px; } }
+  @media (max-width: 900px) { .row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .row { grid-template-columns: 1fr; } .go { padding: 14px 14px 12px; border-radius: 22px; } .go .sub { font-size: 15px; } }
 
   /* your voice: one tile per word, hold to record */
   .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 14px; margin: 18px 0 26px; padding-bottom: 8px; }
@@ -84,9 +86,9 @@
   #play { --bg: var(--ink); --fg: #fff; position: fixed; inset: 0; overflow: hidden; background: var(--bg); color: var(--fg); transition: background .5s;
           user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; }
   #play img { pointer-events: none; }  /* a press that slides must not start dragging the photo */
-  #play.touch .cursor, #play.touch .mousey { display: none; }  /* a finger needs no arrow */
-  #play.kb:not(.peek), #play.kb:not(.peek) *, #play.ms, #play.ms * { cursor: none; }
-  #scene { position: absolute; inset: 0; box-sizing: border-box; display: grid; place-content: center; justify-items: center; gap: 5vmin; text-align: center; }
+  #play.kb:not(.peek), #play.kb:not(.peek) *, #play.ms, #play.ms *, #play.learn, #play.learn * { cursor: none; }
+  #play.touch .cursor, #play.touch .mousey, #play.learn:not(.moused) .cursor { display: none; }  /* a finger needs no arrow; nor does a keyboard */
+  #scene { position: absolute; inset: 0; box-sizing: border-box; display: grid; place-content: center; justify-items: center; gap: 4vmin; text-align: center; }
   #leave { --c: #fff; --d: .8vmin; position: absolute; left: 2vmin; top: 2vmin; z-index: 6; width: max(7vmin, 40px); height: max(7vmin, 40px); padding: 0; border-radius: 28%;
            color: var(--ink); opacity: .5; overflow: hidden; display: grid; place-items: center; }
   #leave svg { position: relative; z-index: 1; width: 62%; }
@@ -100,7 +102,7 @@
   @keyframes wiggle { 25% { transform: translateX(-3vmin); } 75% { transform: translateX(3vmin); } }
   @keyframes pulse { 50% { transform: scale(1.12); } }
   .caption { position: absolute; top: 3.5vmin; left: 12vmin; right: 12vmin; z-index: 4; font-size: 8vmin; font-weight: 900; line-height: 1; pointer-events: none; }
-  .how { position: absolute; left: 0; right: 0; bottom: 4vmin; margin: 0; padding: 0 22vmin; font-size: max(2.6vmin, 15px); font-weight: 700; opacity: .85; }
+  .how { position: absolute; left: 0; right: 0; bottom: 4vmin; margin: 0; padding: 0 22vmin; font-size: max(2.6vmin, 15px); font-weight: 700; opacity: .85; pointer-events: none; }
   .ripple { position: absolute; left: 0; top: 0; z-index: 5; width: 10vmin; height: 10vmin; margin: -5vmin; border-radius: 50%; border: .8vmin solid var(--fg);
             box-sizing: border-box; pointer-events: none; animation: ripple .45s ease-out forwards; }
   @keyframes ripple { from { transform: scale(.2); } to { transform: scale(1); opacity: 0; } }
@@ -144,7 +146,7 @@
   .key.on { transform: translateY(var(--d)); box-shadow: 0 0 0 calc(var(--k) * .1) #fff; z-index: 1; }
   .key.target { z-index: 2; box-shadow: 0 0 0 calc(var(--k) * .1) #fff, 0 0 calc(var(--k) * .7) calc(var(--k) * .2) #fff; animation: pulse .8s ease-in-out infinite; }
 
-  /* mouse activities: a big pointer, and a little mouse on its mat that mirrors the hand */
+  /* a big pointer, and (in the mouse steps) a little mouse on its mat that mirrors the hand */
   .cursor { position: absolute; left: 0; top: 0; z-index: 9; width: 8vmin; pointer-events: none; transform-origin: 10% 6%; transition: scale .08s;
             filter: drop-shadow(0 .7vmin 0 rgba(0, 0, 0, .25)); }
   .cursor.down { scale: .8; }
@@ -157,7 +159,7 @@
   @media (max-aspect-ratio: 1/1) { .mousey { display: none; } }
 
   .sleeper { --s: 20vmin; position: absolute; z-index: 1; width: var(--s); height: var(--s); margin: calc(var(--s) / -2); border-radius: 50%; overflow: hidden; }
-  .sleeper img, .flap img, .choice img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .sleeper img, .flap img, .choice > img { display: block; width: 100%; height: 100%; object-fit: cover; }
   .sleeper.awake { z-index: 3; box-shadow: 0 0 0 1vmin #fff, 0 0 6vmin 2vmin rgba(255, 204, 46, .75); animation: pop .7s cubic-bezier(.3, 1.6, .5, 1); }
   .dark { position: absolute; inset: 0; z-index: 2; pointer-events: none; transition: opacity 1.6s;
           background: radial-gradient(circle var(--r) at var(--x, 50%) var(--y, 50%), rgba(255, 204, 46, .1) 40%, rgba(255, 204, 46, .32) 58%, rgba(34, 27, 74, .97) 100%); }
@@ -183,19 +185,45 @@
   .ball.held { scale: 1.12; }
   .ball.in { scale: .45; opacity: 0; }
 
-  /* point and choose: one question, a few pictures */
-  .ear { --d: 1.4vmin; width: 16vmin; height: 16vmin; padding: 0; border-radius: 50%; color: var(--teal); display: grid; place-items: center; }
+  /* learn: one question, two or three pictures */
+  .ear { --d: 1.4vmin; width: 15vmin; height: 15vmin; padding: 0; border-radius: 50%; color: var(--teal); display: grid; place-items: center; }
   .ear svg { width: 58%; }
-  .choices { --s: min(30vmin, 21vw); max-width: 96vw; }
+  .top { display: flex; align-items: center; gap: 0; min-height: 13vmin; font-size: 13vmin; font-weight: 900; line-height: 1; }
+  .top svg { width: 15vmin; height: 15vmin; }
+  .top .cap { width: 11vmin; height: 11vmin; border-radius: 24%; color: var(--ink); font-size: 8vmin; display: grid; place-items: center; --d: 1vmin; }
+  .choices { --s: min(34vmin, 27vw); max-width: 96vw; }
   .choices.two { --s: min(44vmin, 40vw); gap: min(14vmin, 8vw); }  /* far apart, so "left" and "right" are plain */
-  .choice { --d: 1.6vmin; width: var(--s); height: var(--s); padding: 1vmin; border-radius: 4.5vmin; transition: transform .08s, box-shadow .08s, opacity .4s, scale .3s, filter .4s; }
-  .choice img { border-radius: 3.5vmin; }
+  .top ~ .choices, .ear ~ .choices { --s: min(31vmin, 27vw); }
+  .top ~ .choices.two, .ear ~ .choices.two { --s: min(38vmin, 40vw); }
+  .choice { --d: 1.6vmin; width: var(--s); height: var(--s); padding: 1vmin; border-radius: 4.5vmin; color: var(--ink); overflow: hidden;
+            transition: transform .08s, box-shadow .08s, opacity .4s, scale .3s, filter .4s; }
+  .choice > img { border-radius: 3.5vmin; }
   .choice .disc { width: 78%; height: 78%; margin: 11%; box-sizing: border-box; }
-  .choice.no { opacity: .35; filter: grayscale(1); }
-  .choice.yes { scale: 1.1; z-index: 1; }
+  .choice svg { display: block; width: 100%; height: 100%; }
+  .set, .sized { position: relative; width: 100%; height: 100%; }
+  .set img { position: absolute; width: 29%; height: 29%; border-radius: 50%; object-fit: cover; transition: scale .2s, box-shadow .2s; }
+  .set img.on, .pond img.on { scale: 1.18; box-shadow: 0 0 0 .7vmin var(--sun); }
+  .sized { display: grid; place-items: center; }
+  .sized img { width: calc(var(--z) * 100%); height: calc(var(--z) * 100%); border-radius: 50%; object-fit: cover; }
+  .numeral { font-size: calc(var(--s) * .66); font-weight: 900; line-height: calc(var(--s) - 2vmin); }
+  .choice.glow { box-shadow: 0 var(--d) 0 color-mix(in oklab, var(--c) 68%, var(--ink)), 0 0 0 1vmin var(--sun), 0 0 5vmin 2vmin #fff; animation: pulse 1s ease-in-out infinite; }
+  .choice.no { opacity: .35; filter: grayscale(1); animation: none; }
+  .choice.yes { scale: 1.08; z-index: 1; animation: none; }
   .choices.done .choice:not(.yes) { opacity: .2; }
-  @media (max-aspect-ratio: 1/1) { .choices { --s: 40vmin; } .choices.two { --s: 44vmin; } }
 
+  /* count: every press adds one; race: every press is one hop along the numbers */
+  .pond { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 3vmin; max-width: 94vw; min-height: 24vmin; }
+  .pond img { width: 21vmin; height: 21vmin; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1vmin #fff; transition: scale .2s, box-shadow .2s; }
+  .okay { --c: var(--sun); --d: 1.6vmin; width: 18vmin; height: 18vmin; padding: 0; border-radius: 50%; color: var(--ink); display: grid; place-items: center; }
+  .okay svg { width: 56%; }
+  .lane { display: flex; gap: 1.2vmin; margin-top: 16vmin; }
+  .lane .cap { --d: 1vmin; width: min(8.6vw, 13vmin); height: min(8.6vw, 13vmin); border-radius: 22%; color: var(--ink); font-size: min(5vw, 7.5vmin); font-weight: 900; display: grid; place-items: center; }
+  .lane .cap.here { --c: var(--sun); }
+  .runner { position: absolute; left: 0; top: 0; z-index: 3; width: min(8.6vw, 13vmin); height: min(8.6vw, 13vmin); border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 .8vmin #fff;
+            transition: translate .35s cubic-bezier(.3, 1.4, .5, 1); }
+  .dice { --d: 1.4vmin; min-width: 20vmin; height: 20vmin; padding: 0 3vmin; border-radius: 4vmin; color: var(--ink); font-size: 14vmin; font-weight: 900; line-height: 20vmin; }
+
+  /* portrait: a phone held upright has height to spare, so pictures and keys grow */
   @media (max-aspect-ratio: 1/1) {
     .card { width: 82vw; height: 58vw; }
     .card.colour { width: 58vw; }
@@ -203,8 +231,14 @@
     .ask { font-size: max(4.2vmin, 16px); }
     .how { padding: 0 6vmin; font-size: max(3.6vmin, 15px); }
     .mirror.big { --k: 8.6vw; grid-auto-rows: calc(var(--k) * 2.8); }
-    .choices.two { flex-direction: column; align-items: center; --s: min(72vw, 35vh); gap: 4vh; }  /* one above the other, as big as they fit */
+    .choices { --s: min(46vw, 30vh); }
+    .choices.two, .top ~ .choices.two, .ear ~ .choices.two { flex-direction: column; align-items: center; --s: min(72vw, 33vh); gap: 3.5vh; }  /* one above the other, as big as they fit */
+    .top ~ .choices.two, .ear ~ .choices.two { --s: min(66vw, 29vh); }
     .flaps { --s: min(var(--size), 42vw) !important; max-width: 96vw !important; }
+    .pond img { width: 26vmin; height: 26vmin; }
+    .top svg { width: 9vw; height: 9vw; }
+    .top .cap { width: 9vw; height: 9vw; font-size: 6vw; }
+    .top { gap: 1.4vw; }
   }
 
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
@@ -218,7 +252,7 @@
 </div>
 <div id="stickers"></div>
 <script>
-// Why things are the way they are (big keys, two pictures, the name said in the clear, a sitting that ends): see README.md.
+// Why things are the way they are, and the studies behind each choice: README.md, and "How to help, and why" in the app.
 
 // ---- content: a key is always the same animal or colour, so a small kid can learn where "the cow" lives ----
 
@@ -252,13 +286,31 @@ const COLORS = [
 ];
 const BG = ['tomato', 'sky', 'leaf', 'grape', 'rose', 'teal'].map(name => `var(--${name})`); // backgrounds for animals, rotating
 const NIGHT = 'var(--ink)';
+// Animals whose plural is a plain "s" in both languages, for counting; the first seven are "le" in French, for "le grand canard".
+const COUNTABLE = ['duck', 'cat', 'dog', 'pig', 'rabbit', 'lion', 'tiger', 'cow', 'chicken', 'frog'];
+const NUMS = [['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'], ['zéro', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix']];
+// [english, french, what makes it that shape: said once the child has found it]
+const SHAPES = {
+  circle: ['circle', 'rond', ['A circle: round all the way, no corners.', 'Un rond : tout rond, pas de coin.']],
+  square: ['square', 'carré', ['A square: four sides, all the same.', 'Un carré : quatre côtés, tous pareils.']],
+  triangle: ['triangle', 'triangle', ['A triangle: three sides, three corners.', 'Un triangle : trois côtés, trois coins.']],
+  rectangle: ['rectangle', 'rectangle', ['A rectangle: two long sides, two short ones.', 'Un rectangle : deux grands côtés, deux petits.']],
+};
 
 // ---- the learner: what this kid has met, knows and can do, kept in this browser ----
 
-// seen: times met. word: knows the word (Point). know: knows where it lives on the keyboard (Find). lvl, streak: mouse steps.
-const fresh = () => ({ seen: {}, word: {}, know: {}, lvl: {}, streak: {}, grain: 'big', minutes: 10 });
-let me = fresh();
-try { me = { ...fresh(), ...JSON.parse(localStorage.kido || '{}') }; } catch {}
+// seen: times met. know: how well each thing is known (0 to 3), per subject. lvl, streak: mouse steps.
+const fresh = () => ({ seen: {}, know: { words: {}, english: {}, numbers: {}, shapes: {}, keys: {} }, lvl: {}, streak: {}, age: 2, grain: 'big', minutes: 10 });
+function load() {
+  let raw = {};
+  try { raw = JSON.parse(localStorage.kido || '{}'); } catch {}
+  const old = raw.know || {}, flat = Object.keys(old).some(key => /^(Key|Digit)/.test(key)); // an earlier version kept key places here, and words apart
+  const me = { ...fresh(), ...raw, know: fresh().know };
+  for (const subject in me.know) me.know[subject] = (flat || raw.word ? { words: raw.word, keys: flat ? old : {} }[subject] : old[subject]) || {};
+  delete me.word;
+  return me;
+}
+let me = load();
 const save = () => { try { localStorage.kido = JSON.stringify(me); } catch {} };
 let FR = (me.lang || navigator.language).startsWith('fr');
 
@@ -268,13 +320,14 @@ function keyInfo(code) {
   const c = ROWS[r].indexOf(code);
   if (r === 0) {
     const [emoji, bg, en, fr, fg = '#fff'] = COLORS[c];
-    return { code, emoji, bg, fg, en, name: FR ? fr : en, sound: '', img: '', clip: '' };
+    return { code, emoji, bg, fg, en, names: [en, fr], name: FR ? fr : en, sound: '', img: '', clip: '' };
   }
   const n = ROWS.slice(1, r).reduce((a, row) => a + row.length, 0) + c;
   const [emoji, en, enSound, fr, frSound] = ANIMALS[n];
-  return { code, emoji, bg: BG[n % BG.length], fg: '#fff', en, name: FR ? fr : en, sound: FR ? frSound : enSound,
+  return { code, emoji, bg: BG[n % BG.length], fg: '#fff', en, names: [en, fr], name: FR ? fr : en, sound: FR ? frSound : enSound,
            img: `img/${en}.jpg`, clip: CLIPS.has(en) ? `snd/${en}.mp3` : '' };
 }
+const byName = en => keyInfo(ALL.find(code => keyInfo(code).en === en));
 
 // Small hands hit several keys at once, and thirty-six animals in one sitting means none is met twice. So the keyboard
 // can be cut into bigger keys: six, or twelve. Every key of a zone answers as the one animal whose own key is in that
@@ -296,39 +349,56 @@ function zoneOf(code, grain) {
 }
 const homeOf = (code, grain) => zoneOf(code, grain)?.find(c => grain === 'all' || GRAINS[grain].includes(keyInfo(c).en)) ?? null;
 const homes = grain => [...new Set(ALL.map(code => homeOf(code, grain)))];
-// Point has a picture on each side of the screen: any key on the left half of the keyboard means the left one
-const sideOf = code => code === 'ArrowLeft' ? 0 : code === 'ArrowRight' ? 1 : where(code) ? +(where(code).c >= 5) : null;
+// A question has two or three pictures side by side: any key on the left of the keyboard means the left one, and so on.
+function sideOf(code, n = 2) {
+  if (code.startsWith('Arrow')) return { ArrowLeft: 0, ArrowRight: n - 1, ArrowDown: n === 3 ? 1 : null, ArrowUp: n === 3 ? 1 : null }[code] ?? null;
+  const at = where(code);
+  return at ? (n === 3 ? at.part : +(at.c >= 5)) : null;
+}
 
 // One press, one thing: while something is on stage, extra presses are ignored. That is what turns smashing into pressing.
 const STAGE_MS = 1500;
 const accept = (now, last) => now - last >= STAGE_MS;
 
-// New words and keys come three at a time, the most familiar animals first, colours later (colour words are hard at two).
-// One more joins each time one is known; the rest wait their turn.
-const INTRO = (() => {
-  const first = ['cow', 'cat', 'dog', 'duck', 'pig', 'sheep', 'horse', 'chicken', 'rabbit', 'lion', 'elephant', 'bear', 'red', 'blue', 'yellow'].map(en => ALL.find(code => keyInfo(code).en === en));
+// Everything is learned the same way: a few things at a time, the next one only when one is known, and the less
+// something is known the more often it comes back. Each subject is an ordered list, easiest and most familiar first.
+const INTRO = (() => { // words: familiar animals first, colours later (colour words are hard at two)
+  const first = ['cow', 'cat', 'dog', 'duck', 'pig', 'sheep', 'horse', 'chicken', 'rabbit', 'lion', 'elephant', 'bear', 'red', 'blue', 'yellow'].map(en => byName(en).code);
   const colours = ROWS[0].filter(code => !first.includes(code));
   return [...first, ...LETTERS.filter(code => !first.includes(code)).flatMap((code, i) => i % 2 ? [code, colours.shift()] : [code]), ...colours].filter(Boolean);
 })();
-const START = 3, KNOWN = 2; // "known" once found twice with less and less help
-const inPlay = (know, order = INTRO) => order.slice(0, START + order.filter(code => know[code] >= KNOWN).length);
-// the less something is known, the more often it comes back; never the same question twice in a row
-function pick(know, last, rnd = Math.random, order = INTRO) {
-  const pool = inPlay(know, order).filter(code => code !== last), weight = code => 4 - (know[code] || 0);
-  let r = rnd() * pool.reduce((sum, code) => sum + weight(code), 0);
-  return pool.find(code => (r -= weight(code)) < 0) ?? pool.at(-1);
+// `floor`: how many steps a child of 2, 3, 4, 5 is assumed to know already, so an older child does not start from "one".
+const SUBJECTS = {
+  words:   { start: 3, order: INTRO, floor: [0, 8, 20, 36] },
+  english: { start: 3, order: INTRO, floor: [0, 0, 0, 0] },
+  // q3: "three" as a quantity. more: which set has more. d3: the written 3. Number words are learned one at a time, in order.
+  numbers: { start: 2, order: ['q1', 'q2', 'q3', 'more', 'q4', 'q5', 'd1', 'd2', 'd3', 'd4', 'd5'], floor: [0, 1, 4, 6] },
+  shapes:  { start: 2, order: ['circle', 'square', 'triangle', 'big', 'small', 'rectangle', 'pattern'], floor: [0, 1, 3, 5] },
+  keys:    { start: 3, order: INTRO, floor: [0, 0, 0, 0] },
+};
+const KNOWN = 2; // "known" once found twice with less and less help
+const START = 3;
+const inPlay = (know, order = INTRO, start = START) => order.slice(0, start + order.filter(item => know[item] >= KNOWN).length);
+// never the same question twice in a row
+function pick(know, last, rnd = Math.random, order = INTRO, start = START) {
+  const pool = inPlay(know, order, start).filter(item => item !== last), weight = item => 4 - (know[item] || 0);
+  let r = rnd() * pool.reduce((sum, item) => sum + weight(item), 0);
+  return pool.find(item => (r -= weight(item)) < 0) ?? pool.at(-1);
 }
-// help fades as the key is learned: it glows at once, then after 4 s, 9 s, 15 s
+// what the child knows in a subject: what was learned here, or what their age lets us assume, whichever is more
+const floorOf = (subject, age = me.age) => SUBJECTS[subject].floor[Math.min(5, Math.max(2, age)) - 2];
+const view = (subject, order = SUBJECTS[subject].order, age = me.age, learned = me.know[subject]) =>
+  Object.fromEntries(order.map((item, i) => [item, Math.max(learned[item] || 0, i < floorOf(subject, age) ? KNOWN : 0)]));
+// help fades as a thing is learned: the answer glows at once, then after 4 s, 9 s, 15 s
 const hintDelay = know => [0, 4000, 9000, 15000][know];
-// found without help: one step up (following the glow counts for a brand-new key). A wrong answer first: one step down. Found with help: no change.
+// found without help: one step up (following the glow counts for a brand-new thing). A wrong answer first: one step down. Found with help: no change.
 const grade = (know, { wrong, hinted }) => wrong ? Math.max(0, know - 1) : !hinted || know === 0 ? Math.min(3, know + 1) : know;
 
 // Mouse steps have three levels and follow the child both ways: `per` smooth pages in a row lift the level, a hard page takes it back down.
 const RULES = {
-  move:   { per: 2, easy: { misses: 99, secs: 30 }, hard: { misses: 99, secs: 120 }, spec: [{ n: 3, size: 24, light: 26, dwell: 0 }, { n: 4, size: 20, light: 20, dwell: 0 }, { n: 5, size: 17, light: 15, dwell: 350 }] },
-  click:  { per: 2, easy: { misses: 2, secs: Infinity }, hard: { misses: 8, secs: Infinity }, spec: [{ n: 2, size: 36 }, { n: 4, size: 28 }, { n: 6, size: 24 }] },
-  drag:   { per: 2, easy: { misses: 2, secs: Infinity }, hard: { misses: 8, secs: Infinity }, spec: [{ n: 1 }, { n: 2 }, { n: 3 }] },
-  choose: { per: 3, easy: { misses: 0, secs: Infinity }, hard: { misses: 2, secs: Infinity }, spec: [{ n: 2 }, { n: 3 }, { n: 4 }] },
+  move:  { per: 2, easy: { misses: 99, secs: 30 }, hard: { misses: 99, secs: 120 }, spec: [{ n: 3, size: 24, light: 26, dwell: 0 }, { n: 4, size: 20, light: 20, dwell: 0 }, { n: 5, size: 17, light: 15, dwell: 350 }] },
+  click: { per: 2, easy: { misses: 2, secs: Infinity }, hard: { misses: 8, secs: Infinity }, spec: [{ n: 2, size: 36 }, { n: 4, size: 28 }, { n: 6, size: 24 }] },
+  drag:  { per: 2, easy: { misses: 2, secs: Infinity }, hard: { misses: 8, secs: Infinity }, spec: [{ n: 1 }, { n: 2 }, { n: 3 }] },
 };
 function nextLevel({ lvl = 1, streak = 0 }, { misses, secs }, { per, easy, hard }) {
   if (misses >= hard.misses || secs >= hard.secs) return { lvl: Math.max(1, lvl - 1), streak: 0 };
@@ -345,29 +415,35 @@ const timeUp = (now = Date.now()) => me.minutes > 0 && sessionStart !== null && 
 // ---- words: [english, french] ----
 
 const TX = {
-  tag: ['A first keyboard and a first mouse for two-year-olds, played together.', 'Un premier clavier et une première souris pour les enfants de deux ans, à jouer à deux.'],
+  tag: ['A screen to do things with, not to watch. Words, numbers, shapes and a second language, from two to five, played together.',
+        'Un écran pour faire, pas pour regarder. Les mots, les nombres, les formes et une deuxième langue, de deux à cinq ans, à jouer à deux.'],
+  age: ['My child is about', 'Mon enfant a environ'], years: ['years', 'ans'],
+  learn: ['Learn', 'Apprendre'],
+  learnSub: ['One question at a time. Touch the answer, click it, or press on its side of the keyboard. New things arrive one by one, with help that fades.',
+             'Une question à la fois. On touche la réponse, on clique dessus, ou on appuie de son côté du clavier. Les nouveautés arrivent une par une, avec une aide qui s’efface.'],
   kb: ['The keyboard', 'Le clavier'],
-  kbSub: ['Small hands start with six big keys, each one home to an animal. Shrink the keys as your child grows.',
-          'Les petites mains commencent avec six grosses touches, chacune est la maison d’un animal. Réduisez les touches quand votre enfant grandit.'],
+  kbSub: ['One press, one thing. Small hands start with six big keys; shrink them as your child grows.', 'Un appui, une chose. Les petites mains commencent avec six grosses touches ; réduisez-les quand votre enfant grandit.'],
   ms: ['The mouse', 'La souris'],
-  msSub: ['A mouse is hard before about three. Start with Move, your hand over theirs.', 'La souris est difficile avant trois ans environ. Commencez par Bouger, votre main sur la sienne.'],
+  msSub: ['A mouse is hard before about three. Start with Move, your hand over theirs. Once it works, every Learn game can be answered with it.',
+          'La souris est difficile avant trois ans environ. Commencez par Bouger, votre main sur la sienne. Ensuite, tous les jeux d’Apprendre se jouent aussi à la souris.'],
   msTouch: ['On this screen these are played with a finger. Fine for the games, but the mouse itself is learned on a computer.', 'Sur cet écran, ces jeux se jouent au doigt. Très bien pour jouer, mais la souris elle-même s’apprend sur un ordinateur.'],
   grain: ['Keys', 'Touches'], big: ['6 big keys', '6 grosses touches'], mid: ['12 keys', '12 touches'], all: ['Every key', 'Toutes les touches'],
-  met: ['met', 'rencontrés'], words: ['words known', 'mots connus'], known: ['keys known', 'touches connues'], lvl: ['Level', 'Niveau'], of: ['of', 'sur'],
+  met: ['met', 'rencontrés'], words: ['words known', 'mots connus'], steps: ['steps', 'étapes'], known: ['keys known', 'touches connues'], lvl: ['Level', 'Niveau'], of: ['of', 'sur'], upTo: ['up to', 'jusqu’à'],
   grown: ['For grown-ups', 'Pour les grands'],
-  tips: [['Stay next to your child. At two, children learn words from an adult who talks with them, much less from a screen alone.',
-          'Repeat the word, ask the question shown under the picture, then look for the same thing in the room.',
+  tips: [['Stay next to your child and talk. At this age children learn from an adult who talks with them, much less from a screen alone.',
+          'Repeat the word or the number, then find the same thing in the room or later in the day.',
           'Keep it short. Kidoboard says goodbye by itself; hold Esc or the house button for one second to come back here.'],
-         ['Restez à côté de votre enfant. À deux ans, on apprend les mots d’un adulte qui parle avec soi, bien moins d’un écran seul.',
-          'Répétez le mot, posez la question affichée sous l’image, puis cherchez la même chose dans la pièce.',
+         ['Restez à côté de votre enfant et parlez. À cet âge, on apprend d’un adulte qui parle avec soi, bien moins d’un écran seul.',
+          'Répétez le mot ou le nombre, puis retrouvez la même chose dans la pièce ou plus tard dans la journée.',
           'Faites court. Kidoboard dit au revoir tout seul ; maintenez Échap ou le bouton maison une seconde pour revenir ici.']],
   session: ['A sitting lasts', 'Une séance dure'], noLimit: ['No limit', 'Sans limite'],
   lang: ['Passer en français', 'Switch to English'],
+  guideBtn: ['How to help, and why', 'Comment aider, et pourquoi'],
   voiceBtn: ['Record your voice', 'Enregistrer votre voix'],
   stickBtn: ['Print key stickers', 'Imprimer des autocollants'],
   reset: ['Erase progress', 'Effacer les progrès'],
   resetAsk: ['Erase everything your child has learned so far?', 'Effacer tout ce que votre enfant a appris jusqu’ici ?'],
-  why: ['Why it works this way', 'Pourquoi ces choix'], credits: ['Photo and sound credits', 'Crédits photos et sons'],
+  credits: ['Photo and sound credits', 'Crédits photos et sons'],
   voice: ['Your voice', 'Votre voix'],
   voiceHow: ['Toddlers learn words best from a familiar voice, in the sing-song way we talk to them. Hold a picture, say its word, let go. Your recording replaces the computer voice for that word.',
              'Les tout-petits apprennent mieux les mots dits par une voix familière, sur le ton chantant qu’on prend pour leur parler. Maintenez une image, dites son mot, relâchez. Votre enregistrement remplace la voix de l’ordinateur pour ce mot.'],
@@ -376,27 +452,58 @@ const TX = {
   stickTitle: ['Kidoboard key stickers', 'Autocollants Kidoboard pour les touches'],
   stickHow: ['Cut out each picture and stick it on the key named under it. For the “Every key” setting: a child matches a picture far more easily than a place.',
              'Découpez chaque image et collez-la sur la touche indiquée dessous. Pour le réglage « Toutes les touches » : un enfant retrouve une image bien plus facilement qu’une place.'],
+  rulesTitle: ['Five rules the whole app follows', 'Cinq règles que suit toute l’application'],
+  rules: [['Together. Guidance for under-fives is shared use and little of it. A child learns far more from a screen when an adult sits there and talks. (AAP 2016; WHO 2019)',
+           'Active means choosing. Pressing anything teaches little. Children learn when they must pick one specific answer, so most games here ask a question. (Kirkorian et al. 2016; Hirsh-Pasek et al. 2015)',
+           'Few things, many times. A new word or number sticks when it comes back often, among few rivals, and is named again once found. New things arrive one at a time. (Horst & Samuelson 2008; Horst et al. 2010)',
+           'The word in the clear. Nothing plays under a word, and the next press waits for it. (McMillan & Saffran 2016)',
+           'Stop while it is fun. Ending at a natural break, announced by the game and not by you, goes more calmly than a countdown. (Hiniker et al. 2016)'],
+          ['Ensemble. Avant cinq ans, les recommandations sont un usage partagé, et peu. Un enfant apprend bien plus d’un écran quand un adulte est là et parle. (AAP 2016 ; OMS 2019)',
+           'Actif veut dire choisir. Appuyer n’importe où apprend peu. On apprend quand il faut choisir une réponse précise : la plupart des jeux posent donc une question. (Kirkorian et al. 2016 ; Hirsh-Pasek et al. 2015)',
+           'Peu de choses, souvent. Un mot ou un nombre nouveau se retient s’il revient souvent, parmi peu de rivaux, et s’il est redit une fois trouvé. Les nouveautés arrivent une à une. (Horst & Samuelson 2008 ; Horst et al. 2010)',
+           'Le mot bien net. Aucun son ne couvre un mot, et l’appui suivant attend qu’il soit dit. (McMillan & Saffran 2016)',
+           'S’arrêter quand c’est encore agréable. Une fin à un moment naturel, annoncée par le jeu et pas par vous, se passe mieux qu’un compte à rebours. (Hiniker et al. 2016)']],
+  helpLabel: ['How to help', 'Comment aider'], whyLabel: ['Why', 'Pourquoi'],
+  guideEnd: ['Full references are in the README file that comes with Kidoboard. Ages are rough guides drawn from these studies. Nobody has tested Kidoboard itself with children.',
+             'Les références complètes sont dans le fichier README fourni avec Kidoboard. Les âges sont des repères tirés de ces études. Personne n’a testé Kidoboard lui-même avec des enfants.'],
   pressAny: ['Press a key', 'Appuie sur une touche'],
   pointHow: ['Touch the picture, or press any key on its side of the keyboard.', 'Touchez l’image, ou appuyez sur une touche de son côté du clavier.'],
   pointTouch: ['Touch the picture.', 'Touchez l’image.'],
+  noVoice: ['This device has no French voice: say the word yourself.', 'Cet appareil n’a pas de voix anglaise : dites le mot vous-même.'],
   yes: ['Yes!', 'Oui !'],
+  who: ['Who makes this sound?', 'Qui fait ce bruit ?'],
+  more: ['Which has more?', 'Où y en a-t-il le plus ?'],
+  next: ['What comes next?', 'Qu’est-ce qui vient après ?'],
   moveIt: ['Move the mouse. Wake up the animals!', 'Bouge la souris. Réveille les animaux !'],
   morning: ['Good morning!', 'Bonjour !'],
   clickIt: ['Click on a key. Who is hiding?', 'Clique sur une touche. Qui se cache ?'],
   dragIt: ['Catch the ball, and put it in the basket.', 'Attrape le ballon, et mets-le dans le panier.'],
-  who: ['Who makes this sound?', 'Qui fait ce bruit ?'],
+  done: ['Then press the yellow button.', 'Puis appuie sur le bouton jaune.'],
+  giveHow: ['Stop at the right number, then press the yellow button (or the space bar).', 'On s’arrête au bon nombre, puis on appuie sur le bouton jaune (ou la barre d’espace).'],
+  win: ['Ten! You made it!', 'Dix ! Arrivé !'],
   bye: ['All done for today. Bye bye!', 'C’est fini pour aujourd’hui. Au revoir !'], byeWord: ['Bye bye!', 'Au revoir !'],
   byeHow: ['Hold Esc or the house button to go back.', 'Maintenez Échap ou le bouton maison pour revenir.'],
 };
 const t = key => TX[key][+FR];
+// Every sentence can be built in either language (`fr`), because the second-language game speaks the other one.
+const nameOf = (info, fr = FR) => info.names[+fr];
 // "the cow" / "la vache", "red" / "le rouge"
-const the = info => info.img ? (FR ? info.name : `the ${info.name}`) : FR ? (/^[aeiou]/.test(info.name) ? "l'" : 'le ') + info.name : info.name;
-const whereIs = info => FR ? `Où est ${the(info)} ?` : `Where is ${the(info)}?`;
-const thatIs = info => FR ? `Ça, c'est ${the(info)}.` : `That's ${the(info)}.`;
+const the = (info, fr = FR) => info.img ? (fr ? nameOf(info, fr) : `the ${nameOf(info, fr)}`) : fr ? (/^[aeiou]/.test(nameOf(info, fr)) ? "l'" : 'le ') + nameOf(info, fr) : nameOf(info, fr);
+const whereIs = (info, fr = FR) => fr ? `Où est ${the(info, fr)} ?` : `Where is ${the(info, fr)}?`;
+const thatIs = (info, fr = FR) => fr ? `Ça, c'est ${the(info, fr)}.` : `That's ${the(info, fr)}.`;
 // A colour word is learned more easily after the thing it describes ("the ball is red", not "the red ball").
-const ballIs = info => FR ? `Le ballon est ${info.name}.` : `The ball is ${info.name}.`;
-const whichBall = info => FR ? `Quel ballon est ${info.name} ?` : `Which ball is ${info.name}?`;
-const thatOne = (info, thing = ['ball', 'ballon']) => FR ? `Ce ${thing[1]} est ${info.name}.` : `That ${thing[0]} is ${info.name}.`;
+const ballIs = (info, fr = FR) => fr ? `Le ballon est ${nameOf(info, fr)}.` : `The ball is ${nameOf(info, fr)}.`;
+const whichBall = (info, fr = FR) => fr ? `Quel ballon est ${nameOf(info, fr)} ?` : `Which ball is ${nameOf(info, fr)}?`;
+const thatOne = (info, thing = ['ball', 'ballon'], fr = FR) => fr ? `Ce ${thing[1]} est ${nameOf(info, fr)}.` : `That ${thing[0]} is ${nameOf(info, fr)}.`;
+// "three ducks" / "trois canards", "one cow" / "une vache" (`only`: "just one duck" / "un seul canard")
+function some(info, n, fr = FR, only = false) {
+  if (!fr) return `${only && n === 1 ? 'just ' : ''}${NUMS[0][n]} ${info.en}${n > 1 ? 's' : ''}`;
+  const fem = info.names[1].startsWith('la '), bare = info.names[1].replace(/^l[ea] /, '');
+  return `${n === 1 ? (fem ? 'une' : 'un') + (only ? (fem ? ' seule' : ' seul') : '') : NUMS[1][n]} ${bare}${n > 1 ? 's' : ''}`;
+}
+const whereAre = (info, n, fr = FR) => fr ? `Où y a-t-il ${some(info, n, fr, true)} ?` : n === 1 ? `Where is ${some(info, n, fr, true)}?` : `Where are ${some(info, n, fr)}?`;
+const sized = (info, big, fr = FR) => fr ? `le ${big ? 'grand' : 'petit'} ${info.names[1].slice(3)}` : `the ${big ? 'big' : 'small'} ${info.en}`;
+const upper = text => text[0].toUpperCase() + text.slice(1);
 // Things for the grown-up to say, shown under the picture. {x} is "the cow" or "red".
 const ASKS = [['What does {x} say?', 'Comment fait {x} ?'], ['Where are its eyes? Its mouth?', 'Où sont ses yeux ? Sa bouche ?'],
               ['Can you sound like {x}?', 'Tu sais faire comme {x} ?'], ['What colour is {x}?', 'De quelle couleur est {x} ?']];
@@ -427,7 +534,7 @@ const tick = () => chime(1200, 0.08);
 const blip = i => chime(PENTA[i % PENTA.length], 0.12); // "something happened", over before the word starts
 const cheer = () => [0, 2, 4].forEach((n, i) => setTimeout(() => chime(PENTA[n] * 2, 0.25), i * 80)); // 0.4 s, then the word
 const oops = () => chime(PENTA[0] / 2, 0.2);
-const AFTER_CHEER = 500, AFTER_OOPS = 250; // how long to wait so that no word starts under a sound
+const AFTER_CHEER = 500, AFTER_OOPS = 250, AFTER_BLIP = 150; // how long to wait so that no word starts under a sound
 
 // The parent's own recordings of the words, by "fr:KeyQ". They replace the computer voice where they exist.
 const voices = new Map();
@@ -444,6 +551,9 @@ const store = mode => db.then(d => d && d.transaction('voice', mode).objectStore
 store('readonly').then(s => { if (s) s.openCursor().onsuccess = e => { const c = e.target.result; if (c) { voices.set(c.key, URL.createObjectURL(c.value)); c.continue(); } }; });
 
 let clip, saying = 0;
+const other = text => ({ text, fr: !FR }); // a sentence in the second language
+// does this device have a voice for the second language? (unknown until the browser has listed its voices)
+const lacksVoice = fr => { const list = window.speechSynthesis?.getVoices() || []; return list.length > 0 && !list.some(v => v.lang.toLowerCase().startsWith(fr ? 'fr' : 'en')); };
 // ponytail: browser voice for the names, quality varies by OS; a parent can record their own (Your voice)
 function say(texts, then) {
   const mine = ++saying, done = () => { if (mine === saying) then?.(); }; // a newer sentence cancels what was queued after this one
@@ -451,9 +561,9 @@ function say(texts, then) {
   texts = texts.filter(Boolean);
   if (!window.speechSynthesis || !texts.length) return done();
   speechSynthesis.cancel();
-  texts.forEach((text, i) => {
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = FR ? 'fr-FR' : 'en-US';
+  texts.forEach((item, i) => {
+    const u = new SpeechSynthesisUtterance(item.text ?? item);
+    u.lang = (item.fr ?? FR) ? 'fr-FR' : 'en-US';
     u.rate = 0.8; // slower and a little higher, towards the way adults talk to toddlers
     u.pitch = 1.15;
     if (i === texts.length - 1) u.onend = u.onerror = done;
@@ -470,8 +580,8 @@ function playSound(src, then, otherwise = then) {
 // The word first (calls `named` when it has been heard), then the animal: its recording, or the spoken "moo" if there is none or it fails.
 function tell(info, prefix = '', named) {
   const own = voices.get(voiceKey(info.code)), spoken = () => info.sound && say([info.sound]);
-  const after = () => { named?.(); info.clip ? playSound(info.clip, null, spoken) : spoken(); };
-  own ? say([prefix], () => playSound(own, after)) : say([prefix, info.img ? info.name : ballIs(info)], after);
+  const after = () => { named?.(); if (info.clip) playSound(info.clip, null, spoken); else spoken(); };
+  if (own) say([prefix], () => playSound(own, after)); else say([prefix, info.img ? info.name : ballIs(info)], after);
 }
 function quiet() { saying++; clip?.pause(); window.speechSynthesis?.cancel(); }
 
@@ -483,80 +593,146 @@ const el = (tag, props = {}, ...kids) => { const node = Object.assign(document.c
 const css = (node, name, value) => (node.style.setProperty(name, value), node);
 const rand = (a, b) => a + Math.random() * (b - a);
 const shuffle = list => list.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(([, x]) => x);
+const one = list => list[Math.floor(Math.random() * list.length)];
 const vmin = n => n * Math.min(innerWidth, innerHeight) / 100;
 const again = (node, cls) => { node.classList.remove(cls); void node.offsetWidth; node.classList.add(cls); }; // replay a css animation
 const ico = body => `<svg class="ico" viewBox="0 0 64 64" aria-hidden="true">${body}</svg>`;
 const photo = info => el('img', { src: info.img, alt: '' });
 const POINTER = 'M14 8v34l9-8 6 14 7-3-6-14h12z';
-const FINGERS = matchMedia('(hover: none)').matches; // a phone or a tablet: played with a finger, no mouse to learn here
 const BUBBLE = ico('<path d="M10 12h44v30H30L18 54V42h-8z"/>');
+const FINGERS = matchMedia('(hover: none)').matches; // a phone or a tablet: played with a finger, no mouse to learn here
 
-// ---- the activities: three for the keyboard, then four steps for the mouse ----
+// ---- the activities ----
+// `from`: the age it starts to make sense. `help` and `why` are for the grown-up (How to help, and why); `tip` is the one line shown in the game.
 
 const ACTS = {
-  explore: { track: 'kb', color: 'tomato', start: startExplore, name: ['Press', 'Appuyer'], age: ['from 18 months', 'dès 18 mois'],
+  words:   { track: 'learn', color: 'teal', from: 2, start: first => startLearn('words', first), name: ['Words', 'Les mots'], age: ['from 2', 'dès 2 ans'],
+             sub: ['Where is the cow? Animals first, colours later.', 'Où est la vache ? Les animaux d’abord, les couleurs ensuite.'],
+             icon: '<rect x="6" y="14" width="22" height="22" rx="6"/><rect class="f" x="36" y="14" width="22" height="22" rx="6"/><path d="M47 60V46m-7 7 7-7 7 7"/>',
+             tip: [FINGERS ? 'Touch the picture.' : 'Touch the picture, or press any key on its side of the keyboard.', FINGERS ? 'Touchez l’image.' : 'Touchez l’image, ou appuyez sur une touche de son côté du clavier.'],
+             help: ['Say the word again yourself. Use it later in the day, when you meet the real thing or its picture in a book.', 'Redites le mot vous-même. Réutilisez-le dans la journée, devant la vraie chose ou son image dans un livre.'],
+             why: ['Two-year-olds pick the right picture for a new word easily, then forget it within minutes unless it is repeated and named again. Two pictures work better than many. Choosing between two pictures by touch is also how researchers measure what toddlers understand. (Horst & Samuelson 2008; Horst et al. 2010; Friend & Keplinger 2008)',
+                   'À deux ans, on trouve facilement la bonne image pour un mot nouveau, puis on l’oublie en quelques minutes s’il n’est pas répété et redit. Deux images valent mieux que beaucoup. Choisir entre deux images en touchant est aussi la façon dont les chercheurs mesurent ce qu’un tout-petit comprend. (Horst & Samuelson 2008 ; Horst et al. 2010 ; Friend & Keplinger 2008)'] },
+  english: { track: 'learn', color: 'rose', from: 2.5, start: first => startLearn('english', first), name: ['French', 'L’anglais'], age: ['from 2½', 'dès 2 ans ½'],
+             sub: ['The same pictures, asked in French. A first ear for a second language.', 'Les mêmes images, demandées en anglais. Une première oreille pour une deuxième langue.'],
+             icon: '<path d="M6 10h34v24H22l-8 8v-8H6z"/><path class="f" d="M30 30h28v20h-6v8l-8-8H30z"/>',
+             tip: ['Say the French word together, out loud.', 'Dites le mot anglais ensemble, à voix haute.'],
+             help: ['Say the French word out loud together, every time. Use the same few words in real life, at the park or in the bath. If someone around you speaks French, ask them to play: a person teaches a language far better than a screen.',
+                    'Dites le mot anglais ensemble à voix haute, à chaque fois. Réutilisez ces quelques mots dans la vraie vie, au parc ou dans le bain. Si quelqu’un autour de vous parle anglais, demandez-lui de jouer : une personne enseigne une langue bien mieux qu’un écran.'],
+             why: ['Children accept a second name for a thing when it clearly comes from another language, so each new word is introduced as “in French…”. But babies in a well-known study picked up foreign sounds from a live speaker and not from the same speaker on video, and a review of studies with three to six-year-olds finds screens help a new language mostly when an adult joins in. Expect a few first words and a familiar ear, not fluency. (Au & Glusman 1990; Kuhl et al. 2003; Gfeller et al., review)',
+                   'Un enfant accepte un deuxième nom pour une chose s’il vient clairement d’une autre langue : chaque mot nouveau est donc présenté par « en anglais… ». Mais dans une étude célèbre, des bébés ont appris des sons étrangers d’une personne présente, et pas de la même personne en vidéo ; et une revue d’études sur les trois à six ans conclut que l’écran aide surtout quand un adulte participe. Attendez-vous à quelques premiers mots et à une oreille familière, pas à parler couramment. (Au & Glusman 1990 ; Kuhl et al. 2003 ; Gfeller et al., revue)'] },
+  numbers: { track: 'learn', color: 'sky', from: 2, start: first => startLearn('numbers', first), name: ['Numbers', 'Les nombres'], age: ['from 2', 'dès 2 ans'],
+             sub: ['One, then two, then three. Later: which has more, and the written numbers.', 'Un, puis deux, puis trois. Ensuite : où il y en a le plus, et les chiffres.'],
+             icon: '<text x="32" y="43">123</text>',
+             tip: ['Count together out loud, pointing at each one.', 'Comptez ensemble à voix haute, en montrant chacun.'],
+             help: ['Count real things all day: stairs, grapes, socks. Say how many there are, count them one by one, then say how many again: “Three socks. One, two, three. Three socks!”',
+                    'Comptez de vraies choses toute la journée : les marches, les raisins, les chaussettes. Dites combien il y en a, comptez-les un à un, puis redites combien : « Trois chaussettes. Un, deux, trois. Trois chaussettes ! »'],
+             why: ['Children learn what “one” means, then “two”, then “three”, one at a time and over many months; most two-year-olds know only “one”, even if they can recite to ten. Only after “three” or “four” do they grasp that counting tells how many. Saying the total next to the count helped three-year-olds make that link, and number talk about things the child can see matters most. (Wynn 1990, 1992; Sarnecka & Carey 2008; Mix et al. 2012; Gunderson & Levine 2011)',
+                   'L’enfant apprend ce que veut dire « un », puis « deux », puis « trois », un par un et sur de longs mois ; la plupart des enfants de deux ans ne connaissent que « un », même s’ils récitent jusqu’à dix. C’est seulement après « trois » ou « quatre » qu’il comprend que compter dit combien. Dire le total juste à côté du comptage a aidé des enfants de trois ans à faire ce lien, et ce sont les nombres dits à propos de choses visibles qui comptent le plus. (Wynn 1990, 1992 ; Sarnecka & Carey 2008 ; Mix et al. 2012 ; Gunderson & Levine 2011)'] },
+  shapes:  { track: 'learn', color: 'grape', from: 2.5, start: first => startLearn('shapes', first), name: ['Shapes', 'Les formes'], age: ['from 2½', 'dès 2 ans ½'],
+             sub: ['Circle, square, triangle, in all their odd versions. Big and small. Later: what comes next?', 'Rond, carré, triangle, sous toutes leurs formes. Grand et petit. Ensuite : qu’est-ce qui vient après ?'],
+             icon: '<circle cx="18" cy="20" r="11"/><rect x="36" y="9" width="21" height="21" rx="2"/><path d="M32 36 50 58H14z"/>',
+             tip: ['Name what makes the shape: its sides, its corners.', 'Nommez ce qui fait la forme : ses côtés, ses coins.'],
+             help: ['Hunt for shapes around the house and say what makes each one: “Three sides, so it is a triangle”, even when it is thin or upside down. For patterns, say them aloud like a song: “red, blue, red, blue…”',
+                    'Cherchez des formes dans la maison et dites ce qui fait chacune : « Trois côtés, donc c’est un triangle », même s’il est tout fin ou à l’envers. Pour les suites, dites-les comme une chanson : « rouge, bleu, rouge, bleu… »'],
+             why: ['Four and five-year-olds who were shown odd examples as well as textbook ones, and guided to find what defines each shape, learned shapes better than children who were simply told or left to play. And how well a child handles repeating patterns at the end of preschool predicts their maths years later. (Fisher et al. 2013; Fyfe, Rittle-Johnson & Farran 2019)',
+                   'Des enfants de quatre et cinq ans à qui l’on montrait des exemples inhabituels en plus des exemples classiques, en les guidant pour trouver ce qui définit chaque forme, ont mieux appris que ceux à qui on l’expliquait simplement ou qu’on laissait jouer. Et l’aisance avec les suites répétées en fin de maternelle prédit le niveau en maths des années plus tard. (Fisher et al. 2013 ; Fyfe, Rittle-Johnson & Farran 2019)'] },
+  explore: { track: 'kb', color: 'tomato', from: 1.5, start: startExplore, name: ['Press', 'Appuyer'], age: ['from 18 months', 'dès 18 mois'],
              sub: ['A press shows an animal, says its name, then plays its call.', 'Un appui montre un animal, dit son nom, puis joue son cri.'],
-             icon: '<rect x="12" y="36" width="40" height="19" rx="7"/><path d="M32 8v17m-8-8 8 8 8-8"/>' },
-  point:   { track: 'kb', color: 'teal', start: first => startQuiz(first, false), name: ['Point', 'Montrer'], age: ['from 2', 'dès 2 ans'],
-             sub: ['Where is the cow? Two pictures: touch one, or press on its side of the keyboard.', 'Où est la vache ? Deux images : on en touche une, ou on appuie de son côté du clavier.'],
-             icon: '<rect x="6" y="14" width="22" height="22" rx="6"/><rect class="f" x="36" y="14" width="22" height="22" rx="6"/><path d="M47 60V46m-7 7 7-7 7 7"/>' },
-  find:    { track: 'kb', color: 'sky', start: startFind, name: ['Find', 'Trouver'], age: ['around 3', 'vers 3 ans'],
+             icon: '<rect x="12" y="36" width="40" height="19" rx="7"/><path d="M32 8v17m-8-8 8 8 8-8"/>',
+             help: ['Ask the question shown under the picture, and wait for an answer, a sound or a pointing finger.', 'Posez la question affichée sous l’image, et attendez une réponse, un son ou un doigt pointé.'],
+             why: ['This is cause and effect: I press, something happens, once. It is where a very young child starts, but in a touchscreen study the youngest toddlers learned a word only when they had to touch the object itself, not just anywhere. So Press is a beginning; the Learn games do the teaching. (Kirkorian et al. 2016)',
+                   'C’est la cause et l’effet : j’appuie, il se passe une chose, une seule. C’est par là qu’un tout-petit commence ; mais dans une étude sur écran tactile, les plus jeunes n’apprenaient un mot que s’ils devaient toucher l’objet lui-même, et pas n’importe où. Appuyer est donc un début ; ce sont les jeux d’Apprendre qui enseignent. (Kirkorian et al. 2016)'] },
+  count:   { track: 'kb', color: 'leaf', from: 2.5, start: startCount, name: ['Count', 'Compter'], age: ['from 2½', 'dès 2 ans ½'],
+             sub: ['Every press adds one duck, counted aloud. Later: stop at the right number yourself.', 'Chaque appui ajoute un canard, compté à voix haute. Ensuite : s’arrêter tout seul au bon nombre.'],
+             icon: '<text x="32" y="43">+1</text>',
+             tip: ['Every press adds one. Count along together.', 'Chaque appui en ajoute un. Comptez ensemble.'],
+             help: ['Count along out loud, one word for each press. Then count out the same number of real things: “Give me three spoons.”', 'Comptez à voix haute, un mot par appui. Puis faites compter le même nombre de vraies choses : « Donne-moi trois cuillères. »'],
+             why: ['“Give me three” is the task researchers use to find out which numbers a child really understands; reciting the count is not enough. Until a child knows “three” in the Numbers game, Count counts with them and stops at the right number. After that, they must stop themselves. (Wynn 1990, 1992; Mix et al. 2012)',
+                   '« Donne-m’en trois » est l’épreuve qu’utilisent les chercheurs pour savoir quels nombres un enfant comprend vraiment ; réciter la comptine ne suffit pas. Tant que l’enfant ne connaît pas « trois » dans le jeu des Nombres, Compter compte avec lui et s’arrête au bon nombre. Ensuite, c’est à lui de s’arrêter. (Wynn 1990, 1992 ; Mix et al. 2012)'] },
+  find:    { track: 'kb', color: 'sky', from: 3, start: startFind, name: ['Find', 'Trouver'], age: ['around 3', 'vers 3 ans'],
              sub: ['Where does the cow live? Its key lights up, less and less as they learn.', 'Où habite la vache ? Sa touche s’allume, de moins en moins.'],
-             icon: '<circle cx="27" cy="27" r="16"/><path d="m39 39 16 16"/>' },
-  move:    { track: 'ms', color: 'grape', start: startMove, name: ['Move', 'Bouger'], age: ['from 2½', 'dès 2 ans ½'],
+             icon: '<circle cx="27" cy="27" r="16"/><path d="m39 39 16 16"/>',
+             help: ['Point at the key on the little keyboard on screen, then at the same place on the real one. Stickers on the real keys make it much easier.', 'Montrez la touche sur le petit clavier à l’écran, puis au même endroit sur le vrai. Des autocollants sur les vraies touches rendent le jeu bien plus facile.'],
+             why: ['The keyboard on screen is a map of the real one. Around two and a half, children mostly cannot use a model or a map of a space to find something in the real space; around three they can. Matching the same picture is far easier, hence the stickers. (DeLoache 1987, 2000)',
+                   'Le clavier à l’écran est un plan du vrai. Vers deux ans et demi, un enfant ne sait généralement pas se servir d’une maquette ou d’un plan pour trouver quelque chose dans le vrai espace ; vers trois ans, il y arrive. Retrouver la même image est bien plus facile, d’où les autocollants. (DeLoache 1987, 2000)'] },
+  race:    { track: 'kb', color: 'grape', from: 4, start: startRace, name: ['Race', 'La course'], age: ['from 4', 'dès 4 ans'],
+             sub: ['Hop along the numbers from 1 to 10, one press per hop.', 'Avancer sur les nombres de 1 à 10, un appui par saut.'],
+             icon: '<rect x="4" y="38" width="14" height="14" rx="3"/><rect x="25" y="38" width="14" height="14" rx="3"/><rect class="f" x="46" y="38" width="14" height="14" rx="3"/><path d="M12 28c8-12 30-12 40 0m-9-1h9v-9"/>',
+             tip: ['Say each number together as the animal lands on it.', 'Dites chaque nombre ensemble quand l’animal s’y pose.'],
+             help: ['Say each number aloud together as the animal lands on it: “five, six”. That is what the children did in the study.', 'Dites chaque nombre à voix haute ensemble quand l’animal s’y pose : « cinq, six ». C’est ce que faisaient les enfants dans l’étude.'],
+             why: ['Four short sessions of a board game with the numbers 1 to 10 in a line, moving one or two squares and naming them, improved preschoolers’ counting, number reading, comparing and sense of where numbers sit. The same game with colours did nothing, and a board in a circle did not work either. (Siegler & Ramani 2008, 2009; Ramani & Siegler 2011)',
+                   'Quatre courtes séances d’un jeu de plateau avec les nombres de 1 à 10 en ligne, où l’on avance d’une ou deux cases en les nommant, ont amélioré chez des enfants de maternelle le comptage, la lecture des chiffres, la comparaison et le sens de la place des nombres. Le même jeu avec des couleurs n’a rien changé, et un plateau en cercle non plus. (Siegler & Ramani 2008, 2009 ; Ramani & Siegler 2011)'] },
+  move:    { track: 'ms', color: 'grape', from: 2.5, start: startMove, name: ['Move', 'Bouger'], age: ['from 2½', 'dès 2 ans ½'],
              sub: ['Sweep the lamp over the night to wake the animals. No clicking.', 'Promener la lampe dans la nuit pour réveiller les animaux. Sans cliquer.'],
-             icon: `<path class="f" d="${POINTER}"/><path d="M46 12c6 5 9 12 9 20M50 54c3-3 5-6 6-10"/>` },
-  click:   { track: 'ms', color: 'leaf', start: startClick, name: ['Click', 'Cliquer'], age: ['around 3', 'vers 3 ans'],
+             icon: `<path class="f" d="${POINTER}"/><path d="M46 12c6 5 9 12 9 20M50 54c3-3 5-6 6-10"/>`,
+             help: ['Put your hand over theirs on the mouse at first, and say what happens: “You move, the lamp moves.”', 'Posez d’abord votre main sur la sienne, sur la souris, et dites ce qui se passe : « Tu bouges, la lampe bouge. »'],
+             why: ['There is little research on mouse use before three. Three-year-olds managed a simple cursor-placing task with a mouse; four and five-year-olds still point much less accurately than older children. So the first step asks only for movement, with very large targets. (Strommen et al. 1996; Hourcade et al. 2004)',
+                   'Il y a peu de recherches sur la souris avant trois ans. Des enfants de trois ans ont réussi une tâche simple de placement du curseur ; à quatre et cinq ans, on vise encore bien moins précisément que des enfants plus grands. La première étape ne demande donc que de bouger, avec de très grandes cibles. (Strommen et al. 1996 ; Hourcade et al. 2004)'] },
+  click:   { track: 'ms', color: 'leaf', from: 3, start: startClick, name: ['Click', 'Cliquer'], age: ['around 3', 'vers 3 ans'],
              sub: ['Someone hides under each big key. Click to see who.', 'Quelqu’un se cache sous chaque grosse touche. Un clic pour voir.'],
-             icon: `<path class="f" transform="translate(12 10)" d="${POINTER}"/><path d="M17 18H7M26 9V3M18 11l-7-7"/>` },
-  drag:    { track: 'ms', color: 'rose', start: startDrag, name: ['Drag', 'Glisser'], age: ['from 3½', 'dès 3 ans ½'],
+             icon: `<path class="f" transform="translate(12 10)" d="${POINTER}"/><path d="M17 18H7M26 9V3M18 11l-7-7"/>`,
+             help: ['Let them miss. A click beside the key still makes a small sound, so they know the click happened.', 'Laissez-le rater. Un clic à côté fait quand même un petit son : il sait que le clic a eu lieu.'],
+             why: ['This step is for the hand, not for words: in a study, lift-the-flap pictures made two-year-olds learn words less well. The keys get smaller only when the child clicks them without many misses, and get bigger again if it becomes hard. (Shinskey 2021)',
+                   'Cette étape est pour la main, pas pour les mots : dans une étude, les images à soulever faisaient moins bien apprendre les mots à deux ans. Les touches ne rétrécissent que si l’enfant clique sans trop rater, et regrossissent si cela devient difficile. (Shinskey 2021)'] },
+  drag:    { track: 'ms', color: 'rose', from: 3.5, start: startDrag, name: ['Drag', 'Glisser'], age: ['from 3½', 'dès 3 ans ½'],
              sub: ['Carry each ball to the basket of its colour.', 'Porter chaque ballon dans le panier de sa couleur.'],
-             icon: '<circle class="f" cx="15" cy="15" r="9"/><path stroke-dasharray="1 10" d="M29 19c9 3 14 9 16 17"/><path d="M32 44h26l-4 14H36z"/>' },
-  choose:  { track: 'ms', color: 'teal', start: first => startQuiz(first, true), name: ['Choose', 'Choisir'], age: ['around 3', 'vers 3 ans'],
-             sub: ['The Point game, answered with the mouse, with more pictures.', 'Le jeu Montrer, avec la souris et davantage d’images.'],
-             icon: '<path class="f" d="M7 25h10l13-10v34L17 39H7z"/><path d="M40 24c4 4 4 12 0 16M47 16c9 8 9 24 0 32"/>' },
+             icon: '<circle class="f" cx="15" cy="15" r="9"/><path stroke-dasharray="1 10" d="M29 19c9 3 14 9 16 17"/><path d="M32 44h26l-4 14H36z"/>',
+             help: ['If holding the button is too hard, show the other way: click the ball, move, click the basket.', 'Si tenir le bouton est trop difficile, montrez l’autre façon : un clic sur le ballon, on bouge, un clic sur le panier.'],
+             why: ['Studies disagree on dragging: one found five and six-year-olds slower and less accurate at dragging than at pointing, another found holding and dragging faster than click, move, click. So both ways work here. Colours are said after the noun, “the ball is red”, which helped two-year-olds learn colour words. (Joiner et al. 1998; Donker & Reitsma 2007; Ramscar et al. 2010)',
+                   'Les études ne s’accordent pas sur le glisser : l’une a trouvé des enfants de cinq et six ans plus lents et moins précis en glissant qu’en pointant, une autre que tenir et glisser allait plus vite que clic, déplacement, clic. Les deux façons marchent donc ici. Les couleurs sont dites après le nom, « le ballon est rouge », ce qui a aidé des enfants de deux ans à apprendre les mots de couleur. (Joiner et al. 1998 ; Donker & Reitsma 2007 ; Ramscar et al. 2010)'] },
 };
-const SOUND = ico(ACTS.choose.icon);
+const SOUND = ico('<path class="f" d="M7 25h10l13-10v34L17 39H7z"/><path d="M40 24c4 4 4 12 0 16M47 16c9 8 9 24 0 32"/>');
+const CHECK = ico('<path d="m12 34 14 14 26-30"/>');
 
 // ---- home ----
 
-let view = 'home';
+let showing = 'home';
 function progress(kind) {
-  if (ACTS[kind].track === 'ms') {
+  const a = ACTS[kind];
+  if (a.track === 'ms') {
     const l = me.lvl[kind] || 1;
     return [1, 2, 3].map(i => `<i${i <= l ? ' class="on"' : ''}></i>`).join('') + `<span>${t('lvl')} ${l} ${t('of')} 3</span>`;
   }
-  const pool = kind === 'point' ? ALL : homes(me.grain), map = { explore: me.seen, point: me.word, find: me.know }[kind];
-  const n = pool.filter(code => kind === 'explore' ? map[code] : map[code] >= KNOWN).length;
-  return `<b style="--p:${n / pool.length * 100}%"></b>${n} ${t('of')} ${pool.length} ${t({ explore: 'met', point: 'words', find: 'known' }[kind])}`;
+  if (kind === 'count') return `${t('upTo')} ${countPlan().max}`;
+  if (kind === 'race') return '1 – 10';
+  const bar = (n, total, word) => `<b style="--p:${n / total * 100}%"></b>${n} ${t('of')} ${total} ${t(word)}`;
+  if (kind === 'explore') return bar(homes(me.grain).filter(code => me.seen[code]).length, homes(me.grain).length, 'met');
+  const order = kind === 'find' ? homes(me.grain) : SUBJECTS[kind].order, know = view(kind === 'find' ? 'keys' : kind, order);
+  return bar(order.filter(item => know[item] >= KNOWN).length, order.length, kind === 'find' ? 'known' : kind === 'numbers' || kind === 'shapes' ? 'steps' : 'words');
 }
 const seg = (label, key, options) => `<div class="seg" role="group" aria-label="${label}">${label}${
   options.map(([value, text]) => `<button class="cap" data-set="${key}" data-value="${value}" aria-pressed="${me[key] === value}">${text}</button>`).join('')}</div>`;
 function renderHome() {
   document.documentElement.lang = FR ? 'fr' : 'en';
-  if (view === 'voices') return renderVoices();
-  const track = (kind, extra = '') => `<section class="track"><h2>${t(kind)}</h2><p>${t(kind === 'ms' && FINGERS ? 'msTouch' : kind + 'Sub')}</p>${extra}<div class="row ${kind}">${
+  if (showing === 'voices') return renderVoices();
+  if (showing === 'guide') return renderGuide();
+  const track = (kind, sub = t(kind + 'Sub'), extra = '') => `<section class="track"><h2>${t(kind)}</h2><p>${sub}</p>${extra}<div class="row">${
     Object.entries(ACTS).filter(([, a]) => a.track === kind).map(([name, a], i) =>
-      `<button class="cap go" data-act="${name}" style="--c:var(--${a.color})"><span class="num">${i + 1}<em>${a.age[+FR]}</em></span>${ico(a.icon)}<strong>${a.name[+FR]}</strong>` +
+      `<button class="cap go${a.from > me.age + .5 ? ' later' : ''}" data-act="${name}" style="--c:var(--${a.color})"><span class="num">${i + 1}<em>${a.age[+FR]}</em></span>${ico(a.icon)}<strong>${a.name[+FR]}</strong>` +
       `<span class="sub">${a.sub[+FR]}</span><span class="prog">${progress(name)}</span></button>`).join('')}</div></section>`;
   $('#home').innerHTML = `<header><h1 class="logo" aria-label="Kidoboard">${[...'kidoboard'].map(ch => `<span class="cap" aria-hidden="true">${ch}</span>`).join('')}</h1>
-    <p class="tag">${t('tag')}</p></header>
-    ${track('kb', seg(t('grain'), 'grain', ['big', 'mid', 'all'].map(g => [g, t(g)])))}${track('ms')}
+    <p class="tag">${t('tag')}</p>${seg(t('age'), 'age', [2, 3, 4, 5].map(n => [n, `${n} ${t('years')}`]))}</header>
+    ${track('learn')}${track('kb', t('kbSub'), seg(t('grain'), 'grain', ['big', 'mid', 'all'].map(g => [g, t(g)])))}${track('ms', t(FINGERS ? 'msTouch' : 'msSub'))}
     <section class="track"><h2>${t('grown')}</h2><ul>${t('tips').map(tip => `<li>${tip}</li>`).join('')}</ul>
     ${seg(t('session'), 'minutes', [[5, '5 min'], [10, '10 min'], [15, '15 min'], [0, t('noLimit')]])}
-    <div class="tools"><button class="cap" id="voice">${t('voiceBtn')}</button><button class="cap" id="stick">${t('stickBtn')}</button><button class="cap" id="lang">${t('lang')}</button>
-    <button class="cap" id="reset">${t('reset')}</button><a href="https://github.com/louisinger/kidoboard#readme" target="_blank" rel="noopener">${t('why')}</a>
-    <a href="https://github.com/louisinger/kidoboard/blob/main/CREDITS.md" target="_blank" rel="noopener">${t('credits')}</a></div></section>`;
+    <div class="tools"><button class="cap" id="guide">${t('guideBtn')}</button><button class="cap" id="voice">${t('voiceBtn')}</button><button class="cap" id="stick">${t('stickBtn')}</button>
+    <button class="cap" id="lang">${t('lang')}</button><button class="cap" id="reset">${t('reset')}</button><a href="CREDITS.md" target="_blank" rel="noopener">${t('credits')}</a></div></section>`;
 }
 $('#home').addEventListener('click', e => {
   const go = e.target.closest('.go'), set = e.target.closest('[data-set]');
   if (go) return openAct(go.dataset.act);
-  if (set) { me[set.dataset.set] = isNaN(set.dataset.value) ? set.dataset.value : +set.dataset.value; save(); return renderHome(); }
+  if (set) {
+    me[set.dataset.set] = isNaN(set.dataset.value) ? set.dataset.value : +set.dataset.value;
+    if (set.dataset.set === 'age') me.grain = { 2: 'big', 3: 'mid' }[me.age] || 'all'; // the keys shrink with age; still adjustable below
+    save();
+    return renderHome();
+  }
   if (e.target.id === 'lang') { FR = !FR; me.lang = FR ? 'fr' : 'en'; save(); renderHome(); }
-  if (e.target.id === 'reset' && confirm(t('resetAsk'))) { me = { ...fresh(), lang: me.lang, grain: me.grain, minutes: me.minutes }; save(); renderHome(); }
+  if (e.target.id === 'reset' && confirm(t('resetAsk'))) { me = { ...fresh(), lang: me.lang, age: me.age, grain: me.grain, minutes: me.minutes }; save(); renderHome(); }
   if (e.target.id === 'stick') printStickers();
-  if (e.target.id === 'voice') { view = 'voices'; renderHome(); scrollTo(0, 0); }
-  if (e.target.id === 'back') { view = 'home'; micStop(); renderHome(); }
+  if (e.target.id === 'voice' || e.target.id === 'guide') { showing = e.target.id === 'voice' ? 'voices' : 'guide'; renderHome(); scrollTo(0, 0); }
+  if (e.target.id === 'back') { showing = 'home'; micStop(); renderHome(); scrollTo(0, 0); }
   if (e.target.id === 'unvoice') { voices.clear(); store('readwrite').then(s => s?.clear()); renderHome(); }
 });
 $('#home').addEventListener('pointerdown', e => { // the name is made of keys, and keys are for pressing
@@ -567,6 +743,15 @@ $('#home').addEventListener('pointerdown', e => { // the name is made of keys, a
   cap.classList.add('down');
   setTimeout(() => cap.classList.remove('down'), 160);
 });
+
+// How to help, and why: the method behind each game, for the grown-up who wants to do the same away from the screen.
+function renderGuide() {
+  const part = kind => `<h2>${t(kind)}</h2>${Object.values(ACTS).filter(a => a.track === kind).map(a =>
+    `<h3>${a.name[+FR]} <small>${a.age[+FR]}</small></h3><p><b>${t('helpLabel')}.</b> ${a.help[+FR]}</p><p><b>${t('whyLabel')}.</b> ${a.why[+FR]}</p>`).join('')}`;
+  $('#home').innerHTML = `<section class="track"><div class="tools"><button class="cap" id="back">${t('back')}</button></div><h2>${t('rulesTitle')}</h2>
+    <ol>${t('rules').map(rule => `<li>${rule}</li>`).join('')}</ol>${part('learn')}${part('kb')}${part('ms')}<p><small>${t('guideEnd')}</small></p>
+    <div class="tools"><button class="cap" id="back">${t('back')}</button></div></section>`;
+}
 
 // Stickers turn "find the place" into "find the same picture", which a two-year-old can do. One per real key, so they suit the every-key setting.
 function printStickers() {
@@ -587,7 +772,7 @@ function renderVoices() {
   const blocked = () => { if ($('#micNote')) $('#micNote').hidden = false; };
   if (mic) return;
   if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) return blocked();
-  navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => { if (view === 'voices') mic = stream; else stream.getTracks().forEach(tr => tr.stop()); }, blocked);
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => { if (showing === 'voices') mic = stream; else stream.getTracks().forEach(tr => tr.stop()); }, blocked);
 }
 function recStart(tile) {
   if (!mic || recorder) return;
@@ -631,6 +816,7 @@ function mount(kind, first = false) {
   play.className = `${ACTS[kind].track} ${kind}`;
   paint(NIGHT);
   ACTS[kind].start(first);
+  if (first && ACTS[kind].tip && !$('.how', scene)) scene.append(el('p', { className: 'how', textContent: ACTS[kind].tip[+FR] }));
 }
 function openAct(kind) {
   $('#home').hidden = true;
@@ -678,11 +864,199 @@ function caption(text) {
 }
 function wiggle(node) { again(node, 'wiggle'); }
 
+// The pointer is drawn big. In the mouse steps a little mouse on a mat also copies the hand: it slides when the hand
+// slides, its button lights when the finger clicks.
+const ptr = { x: innerWidth / 2, y: innerHeight / 2 };
+let touching = FINGERS, moused = false;
+function mouseKit(withToy = true) {
+  const cur = el('div', { className: 'cursor', innerHTML: `<svg viewBox="10 4 38 48"><path d="${POINTER}"/></svg>` });
+  const toy = el('div', { className: 'mousey', hidden: !withToy, innerHTML: '<svg viewBox="0 0 64 88"><path class="l" d="M32 4C17 4 6 14 6 30v6h26z"/><path class="r" d="M32 4c15 0 26 10 26 26v6H32z"/>' +
+    '<path d="M6 36h52v22c0 15-11 26-26 26S6 73 6 58z"/><rect x="28" y="12" width="8" height="16" rx="4"/></svg>' });
+  const place = e => {
+    if (e) { ptr.x = e.clientX; ptr.y = e.clientY; touching = e.pointerType === 'touch'; moused ||= e.pointerType === 'mouse'; }
+    play.classList.toggle('touch', touching);
+    play.classList.toggle('moused', moused);
+    cur.style.translate = `${ptr.x}px ${ptr.y}px`;
+    toy.firstChild.style.translate = `${(ptr.x / innerWidth - .5) * 36}% ${(ptr.y / innerHeight - .5) * 36}%`;
+  };
+  scene.append(toy, cur);
+  place();
+  on(play, 'pointermove', place);
+  on(play, 'pointerdown', e => { place(e); cur.classList.add('down'); toy.classList.add(e.button === 2 ? 'right' : 'left'); });
+  on(window, 'pointerup', () => { cur.classList.remove('down'); toy.classList.remove('left', 'right'); });
+  on(play, 'contextmenu', e => e.preventDefault()); // any button is a click
+}
+// a click on nothing still answers, so the kid knows the click happened; it also tells us aiming is still hard
+function miss() {
+  page.misses++;
+  tick();
+  const node = el('div', { className: 'ripple' });
+  node.style.translate = `${ptr.x}px ${ptr.y}px`;
+  scene.append(node);
+  setTimeout(() => node.remove(), 450);
+}
+
+// ---- learn: one question engine for words, a second language, numbers and shapes ----
+
+// A page is one question. A brand-new thing is shown with its answer glowing: that is the lesson. Next time the glow
+// waits, then waits longer, until it is not needed. A wrong answer names what was picked, puts it aside and asks again.
+// Each subject only has to say how to draw a question: MAKERS[subject](item, how well it is known, how many pictures, what else is in play).
+const lastAsked = {};
+function startLearn(subject, first) {
+  const S = SUBJECTS[subject], know = view(subject);
+  const item = lastAsked[subject] = pick(know, lastAsked[subject], Math.random, S.order, S.start), k = know[item];
+  const q = MAKERS[subject](item, k, k >= KNOWN ? 3 : 2, inPlay(know, S.order, S.start).filter(x => x !== item)); // few rivals while a thing is new
+  paint(`var(--${ACTS[subject].color})`);
+  const tiles = shuffle([q.right, ...q.wrong]).map(pic => Object.assign(el('button', { className: 'cap choice', tabIndex: -1 }, pic.node), { pic }));
+  const target = tiles.find(tile => tile.pic === q.right), row = el('div', { className: tiles.length === 2 ? 'choices two' : 'choices' }, ...tiles);
+  if (q.sound) scene.append(el('button', { className: 'cap ear', tabIndex: -1, innerHTML: SOUND })); else if (q.top) scene.append(q.top);
+  scene.append(row);
+  if (subject === 'english' && lacksVoice(!FR)) scene.append(el('p', { className: 'how', textContent: t('noVoice') }));
+  mouseKit(false);
+  let done = false, wrong = false, hinted = false, last = -Infinity, openAt = Infinity, hintTimer;
+  const hint = () => { hinted = true; target.classList.add('glow'); };
+  function ask(repeat) {
+    if (done) return;
+    openAt = performance.now() + 800; // no answer counts before the question has started
+    caption(q.text);
+    say(!repeat && q.intro ? [...q.intro, ...q.ask] : q.ask, () => q.sound && playSound(q.sound));
+  }
+  function choose(tile) {
+    const now = performance.now();
+    if (done || now < openAt || now - last < 700 || tile.classList.contains('no')) return;
+    last = now;
+    clearTimeout(hintTimer);
+    if (tile !== target) {
+      wrong = true;
+      page.misses++;
+      tile.classList.add('no');
+      oops();
+      wiggle(tile);
+      hint();
+      return later(() => say([tile.pic.oops], () => later(() => ask(true), 400)), AFTER_OOPS);
+    }
+    done = true;
+    tile.classList.add('yes');
+    row.classList.add('done'); // the right one stands out, the others fade
+    me.know[subject][item] = grade(k, { wrong, hinted });
+    save();
+    cheer();
+    caption(q.yes);
+    let left = false;
+    const next = () => { if (!left) { left = true; later(() => mount(subject), 1400); } };
+    later(next, 15000); // should the voice never report back
+    later(() => q.praise(next, tile), AFTER_CHEER);
+  }
+  on(play, 'pointerdown', e => {
+    const tile = e.target.closest('.choice');
+    if (e.target.closest('#leave')) return;
+    if (e.target.closest('.ear')) return playSound(q.sound);
+    if (tile) choose(tile); else if (e.pointerType === 'mouse') miss();
+  });
+  onKey = code => {
+    const typed = /^Digit\d$/.test(code) && tiles.find(tile => tile.pic.digit === +code.slice(5)), side = sideOf(code, tiles.length); // a written 3 can be answered with the 3 key
+    if (typed) choose(typed); else if (side === null) tick(); else choose(tiles[side]);
+  };
+  later(() => { ask(false); hintTimer = later(hint, hintDelay(k)); }, first ? 300 : 600);
+}
+
+const tileOf = info => info.img ? photo(info) : css(el('div', { className: 'disc' }), '--c', info.bg);
+// n pictures of the same animal, scattered: no neat rows, so that it is the number that is learned and not a pattern
+function setOf(info, n) {
+  return el('div', { className: 'set' }, ...shuffle([...Array(9).keys()]).slice(0, n).map(cell => {
+    const img = photo(info);
+    img.style.left = `${3 + (cell % 3) * 32 + rand(0, 4)}%`;
+    img.style.top = `${3 + Math.floor(cell / 3) * 32 + rand(0, 4)}%`;
+    return img;
+  }));
+}
+// say how many, count them one by one, say how many again
+function countAloud(pics, label, done, fr = FR) {
+  const step = i => {
+    if (i === pics.length) return say([upper(label) + ' !'.slice(fr ? 0 : 1)], done);
+    pics[i].classList.add('on');
+    say([NUMS[+fr][i + 1]], () => later(() => step(i + 1), 350));
+  };
+  say([upper(label) + '.'], () => later(() => step(0), 300));
+}
+// A shape drawn in code. `odd` gives the versions books leave out: thin, tilted, upside down. They are just as much a triangle.
+function shapeOf(kind, odd = false, color = one(BG)) {
+  const tilt = odd ? one([0, 20, -25, 45, 90]) : 0, body = {
+    circle: () => `<circle cx="50" cy="50" r="${odd ? rand(20, 38) : 36}"/>`,
+    square: () => { const s = odd ? rand(34, 56) : 60; return `<rect x="${50 - s / 2}" y="${50 - s / 2}" width="${s}" height="${s}" rx="2"/>`; },
+    triangle: () => `<polygon points="${odd ? one(['20,22 86,36 30,84', '50,86 12,22 88,22', '10,78 90,78 76,34', '42,10 62,90 34,90']) : '50,14 90,84 10,84'}"/>`,
+    rectangle: () => { const [w, h] = odd ? one([[26, 80], [84, 22], [70, 34]]) : [80, 46]; return `<rect x="${50 - w / 2}" y="${50 - h / 2}" width="${w}" height="${h}" rx="2"/>`; },
+  }[kind]();
+  return el('div', { innerHTML: `<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="${color}" stroke-linejoin="round" transform="rotate(${kind === 'circle' ? 0 : tilt} 50 50)">${body}</g></svg>` }).firstChild;
+}
+const shapeWord = (kind, fr = FR) => SHAPES[kind][+fr];
+
+const MAKERS = {
+  // "Where is the cow?" Once a word is known it can also be asked by the animal's call.
+  words(code, k, n, live) {
+    const info = keyInfo(code), alike = c => c !== code && !keyInfo(c).img === !info.img; // animals among animals, colours among colours
+    const rivals = [...new Set([...shuffle(live.filter(alike)), ...INTRO.filter(alike)])].slice(0, n - 1).map(keyInfo);
+    const sound = info.clip && k >= KNOWN && Math.random() < .5 ? info.clip : '', text = sound ? t('who') : info.img ? whereIs(info) : whichBall(info);
+    return { text, ask: [text], sound, yes: info.name, right: { node: tileOf(info) }, wrong: rivals.map(r => ({ node: tileOf(r), oops: r.img ? thatIs(r) : thatOne(r) })),
+             praise: done => { meet(code); tell(info, t('yes'), () => later(done, info.clip ? 3200 : 1200)); } };
+  },
+  // The same pictures, asked in the other language. A child accepts a second name for a thing when it clearly belongs
+  // to another language, so a new word is first announced: "In French, the cow is: la vache."
+  english(code, k, n, live) {
+    const L2 = !FR, info = keyInfo(code), alike = c => c !== code && !keyInfo(c).img === !info.img;
+    const rivals = [...new Set([...shuffle(live.filter(alike)), ...INTRO.filter(alike)])].slice(0, n - 1).map(keyInfo);
+    const text = info.img ? whereIs(info, L2) : whichBall(info, L2), word = info.img ? the(info, L2) : nameOf(info, L2);
+    return { text, ask: [other(text)], yes: word, right: { node: tileOf(info) },
+             intro: k === 0 ? [FR ? `En anglais, ${the(info)} se dit :` : `In French, ${the(info)} is:`, other(word)] : null,
+             wrong: rivals.map(r => ({ node: tileOf(r), oops: other(r.img ? thatIs(r, L2) : thatOne(r, undefined, L2)) })),
+             praise: done => say([other(TX.yes[+L2]), other(info.img ? word : ballIs(info, L2))], () => { if (info.clip) playSound(info.clip); later(done, info.clip ? 3200 : 800); }) };
+  },
+  // q3: which picture has three? more: which has more? d3: where is the written 3, or which picture goes with it?
+  numbers(item, k, n, live) {
+    const animal = byName(one(COUNTABLE)), N = +item.slice(1), range = [1, 2, 3, 4, 5];
+    if (item === 'more') {
+      const a = one(k >= KNOWN ? [1, 2, 3, 4] : [1, 2]), b = k >= KNOWN ? one(range.filter(x => x > a)) : one(range.filter(x => x >= a * 2 + 1)); // far apart at first, closer later
+      return { text: t('more'), ask: [t('more')], yes: NUMS[+FR][b], right: { node: setOf(animal, b) }, wrong: [{ node: setOf(animal, a), oops: upper(some(animal, a)) + '.' }],
+               praise: done => say([t('yes'), FR ? `${upper(NUMS[1][b])}, c'est plus que ${NUMS[1][a]}.` : `${upper(NUMS[0][b])} is more than ${NUMS[0][a]}.`], done) };
+    }
+    // the other numbers on offer: those the child is working on, then any up to five
+    const others = [...new Set([...shuffle(live.filter(x => x[0] === item[0]).map(x => +x.slice(1))), ...shuffle(range)])].filter(x => x !== N).slice(0, n - 1);
+    if (item[0] === 'd' && !(k >= 1 && Math.random() < .5)) {
+      const digit = d => ({ node: el('div', { className: 'numeral', textContent: d }), digit: d, oops: FR ? `Ça, c'est le ${NUMS[1][d]}.` : `That's number ${NUMS[0][d]}.` });
+      const text = FR ? `Où est le ${NUMS[1][N]} ?` : `Where is number ${NUMS[0][N]}?`;
+      return { text, ask: [text], yes: `${N}`, right: digit(N), wrong: others.map(digit), praise: done => say([t('yes'), FR ? `Le ${NUMS[1][N]}.` : `Number ${NUMS[0][N]}.`], done) };
+    }
+    const group = d => ({ node: setOf(animal, d), oops: upper(some(animal, d)) + '.' }), text = whereAre(animal, N);
+    return { text, ask: [text], yes: upper(some(animal, N)), right: group(N), wrong: others.map(group), top: item[0] === 'd' ? el('div', { className: 'top', textContent: N }) : null,
+             praise: (done, tile) => countAloud($$('img', tile), some(animal, N), done) };
+  },
+  // circle, square, triangle, rectangle (odd versions once the plain one is found); big and small; what comes next in a pattern
+  shapes(item, k, n, live) {
+    if (item === 'big' || item === 'small') {
+      const animal = byName(one(COUNTABLE.slice(0, 7))), big = item === 'big', text = FR ? `Où est ${sized(animal, big)} ?` : `Where is ${sized(animal, big)}?`;
+      const pic = isBig => ({ node: css(el('div', { className: 'sized' }, photo(animal)), '--z', isBig ? 1 : .45), oops: FR ? `Ça, c'est ${sized(animal, isBig)}.` : `That's ${sized(animal, isBig)}.` });
+      return { text, ask: [text], yes: upper(sized(animal, big)), right: pic(big), wrong: [pic(!big)], praise: done => say([t('yes'), upper(sized(animal, big)) + '.'], done) };
+    }
+    const kinds = Object.keys(SHAPES), pic = (kind, color) => ({ node: shapeOf(kind, k >= 1, color), oops: FR ? `Ça, c'est un ${shapeWord(kind)}.` : `That's a ${shapeWord(kind)}.` });
+    if (item === 'pattern') {
+      const [a, b, c] = shuffle(kinds), tint = { [a]: BG[0], [b]: BG[1], [c]: BG[3] }, unit = k >= KNOWN ? one([[a, b], [a, a, b], [a, b, b]]) : [a, b]; // AB first, then AAB and ABB
+      const line = Array.from({ length: unit.length * 2 + 1 + (unit.length > 2 ? 1 : 0) }, (_, i) => unit[i % unit.length]), answer = unit[line.length % unit.length];
+      const plain = kind => ({ node: shapeOf(kind, false, tint[kind]), oops: FR ? `Ça, c'est un ${shapeWord(kind)}.` : `That's a ${shapeWord(kind)}.` });
+      const top = el('div', { className: 'top' }, ...line.map(kind => shapeOf(kind, false, tint[kind])), el('div', { className: 'cap', textContent: '?' }));
+      return { text: t('next'), ask: [t('next')], yes: shapeWord(answer), top, right: plain(answer), wrong: [answer === a ? b : a, c].slice(0, n - 1).map(plain),
+               praise: done => say([t('yes'), [...line, answer].map(kind => shapeWord(kind)).join(', ') + ' !'.slice(FR ? 0 : 1)], done) };
+    }
+    const rivals = [...new Set([...shuffle(live.filter(x => SHAPES[x])), ...shuffle(kinds)])].filter(x => x !== item).slice(0, n - 1);
+    const text = FR ? `Où est le ${shapeWord(item)} ?` : `Where is the ${shapeWord(item)}?`;
+    return { text, ask: [text], yes: shapeWord(item), right: pic(item), wrong: rivals.map(kind => pic(kind)), praise: done => say([t('yes'), SHAPES[item][2][+FR]], done) };
+  },
+};
+
 // ---- keyboard activities ----
 
 // The mirror: a little keyboard on screen with the same places as the real one. What the hand presses lights up here.
-// With big keys, the keys of a zone are drawn as one wide key. (A two-year-old cannot yet read it as a map of the real
-// keyboard; it is there for the grown-up to point at, and for later.)
+// With big keys, a zone is drawn as one key. (A two-year-old cannot yet read it as a map of the real keyboard; it is
+// there for the grown-up to point at, and for later.)
 let layout = null; // the letters printed on this very keyboard, where the browser can tell (Chrome, Edge)
 navigator.keyboard?.getLayoutMap?.().then(map => { layout = map; $$('.key i').forEach(i => { i.textContent = legend(i.parentNode.dataset.code); }); }).catch(() => {});
 const AZERTY = { KeyQ: 'a', KeyW: 'z', KeyA: 'q', KeyZ: 'w', KeyM: ',' };
@@ -757,8 +1131,105 @@ function startExplore(first) {
     naming = true;
     const heard = () => { naming = false; };
     later(heard, 4000);
-    later(() => tell(info, '', heard), 150);
+    later(() => tell(info, '', heard), AFTER_BLIP);
   };
+}
+
+// Count: one press, one more, and its number said aloud. Until the child knows "three" (in Numbers), the game counts
+// with them and stops at the right number. After that they must stop themselves and say so: the "give me three" task.
+const countPlan = () => { const know = view('numbers'); return { give: know.q3 >= KNOWN, max: know.q3 >= KNOWN ? 5 : 3 }; };
+let lastCount = 0;
+function startCount(first) {
+  const { give, max } = countPlan(), N = lastCount = one([...Array(max).keys()].map(i => i + 1).filter(n => n !== lastCount || max === 1)), animal = byName(one(COUNTABLE));
+  paint('var(--leaf)');
+  const pond = el('div', { className: 'pond' }), okay = el('button', { className: 'cap okay', tabIndex: -1, innerHTML: CHECK, hidden: true });
+  scene.append(pond, okay);
+  peekKit();
+  caption(upper(some(animal, N)));
+  let count = 0, last = -Infinity, busy = true, guided = !give, fails = 0;
+  const order = () => FR ? `${guided ? 'On compte' : 'Donne'} ${some(animal, N)}.` : `${guided ? "Let's count" : 'Give me'} ${some(animal, N)}.`;
+  const resume = () => { busy = false; okay.hidden = guided; };
+  let begun = false;
+  const begin = () => { if (!begun) { begun = true; resume(); } };
+  say([order(), guided ? '' : t('done')], begin);
+  later(begin, 6000); // should the voice never report back
+  if (give && first) scene.append(el('p', { className: 'how', textContent: t('giveHow') }));
+  const won = () => {
+    busy = true;
+    okay.hidden = true;
+    cheer();
+    later(() => say([t('yes'), upper(some(animal, N)) + ' !'.slice(FR ? 0 : 1)], () => later(() => mount('count'), 1600)), AFTER_CHEER);
+    later(() => mount('count'), 9000);
+  };
+  function add(now) {
+    if (busy || now - last < 650) return;
+    last = now;
+    pond.append(Object.assign(photo(animal), { className: 'pop' }));
+    const said = ++count;
+    blip(said);
+    later(() => say([NUMS[+FR][said]], () => { if (guided && said === N) later(won, 300); }), AFTER_BLIP);
+    if (guided && count === N) busy = true; // that was the last one: nothing more to add
+    else if (count > N + 2) finish(); // far past it: stop and look together
+  }
+  function finish() {
+    if (busy || guided || !count) return tick();
+    if (count === N) return won();
+    busy = true;
+    oops();
+    later(() => say([FR ? `Ça fait ${some(animal, count)}. On voulait ${some(animal, N)}.` : `That's ${some(animal, count)}. We wanted ${some(animal, N)}.`], () => {
+      pond.replaceChildren();
+      count = 0;
+      guided = ++fails >= 2; // twice wrong: count it together this time
+      resume();
+      say([order()]);
+    }), AFTER_OOPS);
+  }
+  onKey = (code, now) => code === 'Space' || code === 'Enter' ? finish() : add(now);
+  on(play, 'pointerdown', e => { if (e.target.closest('#leave')) return; if (e.target.closest('.okay')) finish(); else add(performance.now()); });
+}
+
+// Race: the numbers 1 to 10 in a line. The die says one or two; each press is one hop, and each square's number is said
+// as the animal lands on it. This is the board game from the studies, with a key for a counter.
+function startRace() {
+  paint('var(--grape)');
+  const animal = byName(one(COUNTABLE)), dice = el('div', { className: 'cap dice' });
+  const lane = el('div', { className: 'lane' }, ...Array.from({ length: 10 }, (_, i) => el('div', { className: 'cap', textContent: i + 1 })));
+  const runner = Object.assign(photo(animal), { className: 'runner' });
+  scene.append(dice, lane, runner);
+  peekKit();
+  let at = 0, left = 0, last = -Infinity, rolls = 0, armed = 0;
+  const land = () => { // put the runner above its square (before the first hop: just short of square one)
+    const box = (lane.children[at - 1] || lane.children[0]).getBoundingClientRect();
+    runner.style.translate = `${box.left - (at ? 0 : box.width * .45)}px ${box.top - box.height * 1.25}px`;
+    [...lane.children].forEach((cap, i) => cap.classList.toggle('here', i === at - 1));
+  };
+  const roll = () => {
+    const steps = Math.min(one([1, 2]), 10 - at), mine = ++rolls, arm = () => { if (armed < mine) { armed = mine; left = steps; } };
+    dice.textContent = steps;
+    again(dice, 'pop');
+    say([FR ? `Avance de ${NUMS[1][steps]}.` : `Move ${NUMS[0][steps]}.`], arm);
+    later(arm, 3000); // should the voice never report back
+  };
+  const hop = now => {
+    if (!left || now - last < 600) return;
+    last = now;
+    left--;
+    at++;
+    land();
+    blip(at);
+    const landed = at;
+    later(() => say([NUMS[+FR][landed]], () => {
+      if (landed < 10) return left || later(roll, 700);
+      cheer();
+      later(() => say([t('win')], () => later(() => mount('race'), 1800)), AFTER_CHEER);
+    }), AFTER_BLIP);
+    if (at === 10) { left = 0; later(() => mount('race'), 9000); }
+  };
+  onKey = (code, now) => hop(now);
+  on(play, 'pointerdown', e => { if (!e.target.closest('#leave')) hop(performance.now()); });
+  on(window, 'resize', land);
+  land();
+  later(roll, 600);
 }
 
 // Find: "where does the cow live?" Its key glows on the mirror, at once for a new friend, later and later for an old one.
@@ -769,13 +1240,14 @@ function startFind() {
   const hint = () => { q.hinted = true; capsOf(q.code).forEach(cap => cap.classList.add('target')); };
   function ask() {
     if (timeUp()) return goodbye();
-    q = { code: pick(me.know, q?.code, Math.random, order), wrong: false, hinted: false };
-    const info = keyInfo(q.code), live = inPlay(me.know, order);
+    const know = view('keys', order);
+    q = { code: pick(know, q?.code, Math.random, order), wrong: false, hinted: false };
+    const info = keyInfo(q.code), live = inPlay(know, order);
     $$('.key').forEach(cap => { cap.classList.remove('target', 'on'); cap.classList.toggle('out', !live.includes(cap.dataset.item)); });
     put(info, info.name + (FR ? ' ?' : '?'), NIGHT, '#fff');
     $('.card').classList.add('asking');
     say([whereIs(info)]);
-    hintTimer = later(hint, hintDelay(me.know[q.code] || 0));
+    hintTimer = later(hint, hintDelay(know[q.code]));
   }
   onKey = (code, now) => {
     if (!accept(now, last)) return;
@@ -791,7 +1263,7 @@ function startFind() {
       later(() => say([thatIs(info)]), AFTER_OOPS);
       return hint();
     }
-    me.know[q.code] = grade(me.know[q.code] || 0, q);
+    me.know.keys[q.code] = grade(me.know.keys[q.code] || 0, q);
     meet(q.code);
     cheer();
     put(info);
@@ -805,96 +1277,8 @@ function startFind() {
   ask();
 }
 
-// Point (keyboard, or a finger on the screen) and Choose (mouse): "where is the cow?" among a few pictures.
-// Two pictures at first: with few rivals a new word sticks better. The right one is named again once it is found.
-let lastAsked = null;
-function startQuiz(first, mouse) {
-  const kind = mouse ? 'choose' : 'point', n = mouse ? spec('choose').n : 2;
-  paint('var(--teal)');
-  const target = lastAsked = pick(me.word, lastAsked), info = keyInfo(target);
-  const alike = code => code !== target && !keyInfo(code).img === !info.img; // animals among animals, colours among colours
-  const rivals = [...new Set([...shuffle(inPlay(me.word).filter(alike)), ...INTRO.filter(alike)])].slice(0, n - 1);
-  const bySound = !!info.clip && me.word[target] >= KNOWN && Math.random() < .5; // a known animal can also be asked by its call
-  const question = bySound ? t('who') : info.img ? whereIs(info) : whichBall(info);
-  const row = el('div', { className: n === 2 ? 'choices two' : 'choices' }, ...shuffle([target, ...rivals]).map(code => {
-    const item = keyInfo(code);
-    return Object.assign(el('button', { className: 'cap choice', tabIndex: -1 }, item.img ? photo(item) : css(el('div', { className: 'disc' }), '--c', item.bg)), { info: item });
-  }));
-  scene.append(el('button', { className: 'cap ear', tabIndex: -1, innerHTML: SOUND, hidden: !bySound }), row);
-  if (first && !mouse) scene.append(el('p', { className: 'how', textContent: t(FINGERS ? 'pointTouch' : 'pointHow') }));
-  if (mouse) mouseKit(); else peekKit();
-  let done = false, wrong = false, last = -Infinity, openAt = Infinity;
-  function ask() {
-    if (done) return;
-    openAt = performance.now() + 800; // no answer counts before the question has started
-    caption(question);
-    if (bySound) say([question], () => playSound(info.clip)); else say([question]);
-  }
-  function choose(tile) {
-    const now = performance.now();
-    if (done || now < openAt || now - last < 700 || tile.classList.contains('no')) return;
-    last = now;
-    if (tile.info.code !== target) {
-      // a wrong picture still teaches: say who that was, put it aside, ask again
-      wrong = true;
-      page.misses++;
-      tile.classList.add('no');
-      oops();
-      wiggle(tile);
-      return later(() => say([tile.info.img ? thatIs(tile.info) : thatOne(tile.info)], () => later(ask, 400)), AFTER_OOPS);
-    }
-    done = true;
-    tile.classList.add('yes');
-    row.classList.add('done'); // the right one stands out, the others fade
-    me.word[target] = grade(me.word[target] || 0, { wrong, hinted: false });
-    meet(target);
-    cheer();
-    caption(info.name);
-    later(() => tell(info, t('yes')), AFTER_CHEER);
-    if (mouse) settle(kind);
-    later(() => mount(kind), 5200);
-  }
-  on(play, 'pointerdown', e => {
-    const tile = e.target.closest('.choice');
-    if (e.target.closest('#leave')) return;
-    if (e.target.closest('.ear')) return playSound(info.clip);
-    if (tile) choose(tile); else if (mouse) miss();
-  });
-  if (!mouse) onKey = code => { const side = sideOf(code); if (side === null) tick(); else choose(row.children[side]); };
-  later(ask, first ? 300 : 600);
-}
-
 // ---- mouse activities ----
 
-// The pointer is drawn big, and a little mouse on a mat copies the hand: it slides when the hand slides, its button lights when the finger clicks.
-const ptr = { x: innerWidth / 2, y: innerHeight / 2 };
-let touching = FINGERS;
-function mouseKit() {
-  const cur = el('div', { className: 'cursor', innerHTML: `<svg viewBox="10 4 38 48"><path d="${POINTER}"/></svg>` });
-  const toy = el('div', { className: 'mousey', innerHTML: '<svg viewBox="0 0 64 88"><path class="l" d="M32 4C17 4 6 14 6 30v6h26z"/><path class="r" d="M32 4c15 0 26 10 26 26v6H32z"/>' +
-    '<path d="M6 36h52v22c0 15-11 26-26 26S6 73 6 58z"/><rect x="28" y="12" width="8" height="16" rx="4"/></svg>' });
-  const place = e => {
-    if (e) { ptr.x = e.clientX; ptr.y = e.clientY; touching = e.pointerType === 'touch'; }
-    play.classList.toggle('touch', touching);
-    cur.style.translate = `${ptr.x}px ${ptr.y}px`;
-    toy.firstChild.style.translate = `${(ptr.x / innerWidth - .5) * 36}% ${(ptr.y / innerHeight - .5) * 36}%`;
-  };
-  scene.append(toy, cur);
-  place();
-  on(play, 'pointermove', place);
-  on(play, 'pointerdown', e => { place(e); cur.classList.add('down'); toy.classList.add(e.button === 2 ? 'right' : 'left'); });
-  on(window, 'pointerup', () => { cur.classList.remove('down'); toy.classList.remove('left', 'right'); });
-  on(play, 'contextmenu', e => e.preventDefault()); // any button is a click
-}
-// a click on nothing still answers, so the kid knows the click happened; it also tells us aiming is still hard
-function miss() {
-  page.misses++;
-  tick();
-  const node = el('div', { className: 'ripple' });
-  node.style.translate = `${ptr.x}px ${ptr.y}px`;
-  scene.append(node);
-  setTimeout(() => node.remove(), 450);
-}
 // how did that page go? smooth pages lift the level, a hard one brings it back down
 function settle(kind) {
   const next = nextLevel({ lvl: me.lvl[kind], streak: me.streak[kind] }, { misses: page.misses, secs: (performance.now() - page.t0) / 1000 }, RULES[kind]);
@@ -940,7 +1324,7 @@ function startMove(first) {
       meet(s.info.code);
       blip(found);
       caption(s.info.name);
-      later(() => tell(s.info), 150);
+      later(() => tell(s.info), AFTER_BLIP);
       if (++found === n) {
         settle('move');
         later(() => { dark.classList.add('dawn'); cheer(); caption(t('morning')); later(() => say([t('morning')]), AFTER_CHEER); later(() => mount('move'), 3800); }, STAGE_MS + 1500);
@@ -977,7 +1361,7 @@ function startClick(first) {
     }
     blip(opened);
     caption(flap.info.name);
-    later(() => tell(flap.info), 150);
+    later(() => tell(flap.info), AFTER_BLIP);
   });
 }
 
@@ -999,7 +1383,7 @@ function startDrag(first) {
     return at.x > box.left - m && at.x < box.right + m && at.y > box.top - m * 2 && at.y < box.bottom + m;
   });
   function serve() {
-    want = colours[Math.floor(rand(0, n))];
+    want = one(colours);
     css(ball, '--c', want.bg).className = 'ball';
     rest = { x: innerWidth * rand(.2, .75), y: innerHeight * rand(.24, .4) };
     moveTo(rest.x, rest.y);
@@ -1028,7 +1412,7 @@ function startDrag(first) {
     ball.classList.add('in');
     blip(4);
     caption(want.name);
-    later(() => say([t('yes'), ballIs(want)]), 150);
+    later(() => say([t('yes'), ballIs(want)]), AFTER_BLIP);
     if (++served === 3) pageDone('drag', 2400); else later(serve, 2600);
   }
   on(play, 'pointerdown', e => {
@@ -1103,6 +1487,7 @@ if (location.hash === '#test') {
   ok(homeOf('KeyW', 'big') === 'KeyQ' && homeOf('Digit1', 'big') === 'KeyQ' && homeOf('Digit1', 'mid') === 'Digit1' && homeOf('KeyW', 'all') === 'KeyW', 'the cow answers for its whole zone');
   ok($$('.key', mirror('all')).length === ALL.length && $$('.key i', mirror('all')).length === ALL.length, 'with every key, the mirror has them all, with their letter');
   ok(sideOf('KeyQ') === 0 && sideOf('KeyB') === 0 && sideOf('KeyP') === 1 && sideOf('Digit6') === 1 && sideOf('ArrowRight') === 1 && sideOf('Space') === null, 'left and right halves of the keyboard');
+  ok(sideOf('KeyQ', 3) === 0 && sideOf('KeyT', 3) === 1 && sideOf('KeyP', 3) === 2 && sideOf('ArrowRight', 3) === 2 && sideOf('ArrowDown', 3) === 1 && sideOf('ArrowDown') === null, 'three pictures: left, middle, right');
   // the learner
   ok(INTRO.length === ALL.length && new Set(INTRO).size === ALL.length, 'every key is introduced exactly once');
   ok(INTRO.slice(0, 12).every(code => keyInfo(code).img), 'animals come before colours');
@@ -1112,10 +1497,26 @@ if (location.hash === '#test') {
   ok(inPlay({}, homes('big')).length === START && inPlay(Object.fromEntries(ALL.map(code => [code, 3])), homes('big')).length === 6, 'with big keys, Find stays among the six');
   for (let i = 0; i < 50; i++) ok(pick({}, INTRO[0]) !== INTRO[0] && inPlay({}).includes(pick({}, INTRO[0])), 'never the same question twice, always something in play');
   ok(pick({ [INTRO[0]]: 3 }, INTRO[2], () => 0.5) === INTRO[1], 'what is not known yet comes back more often');
-  ok(hintDelay(0) === 0 && [1, 2, 3].every(k => hintDelay(k) > hintDelay(k - 1)), 'help fades as a key is learned');
-  ok(grade(0, { wrong: false, hinted: true }) === 1 && grade(1, { wrong: false, hinted: true }) === 1, 'following the glow teaches a new key, not an old one');
+  ok(hintDelay(0) === 0 && [1, 2, 3].every(k => hintDelay(k) > hintDelay(k - 1)), 'help fades as a thing is learned');
+  ok(grade(0, { wrong: false, hinted: true }) === 1 && grade(1, { wrong: false, hinted: true }) === 1, 'following the glow teaches a new thing, not an old one');
   ok(grade(1, { wrong: false, hinted: false }) === 2 && grade(3, { wrong: false, hinted: false }) === 3, 'found without help: one step up, three at most');
   ok(grade(2, { wrong: true, hinted: true }) === 1 && grade(0, { wrong: true, hinted: true }) === 0, 'a wrong answer first: one step down, never below zero');
+  // subjects, from two to five
+  for (const [subject, S] of Object.entries(SUBJECTS)) {
+    ok(new Set(S.order).size === S.order.length && S.floor.length === 4 && S.floor.every((f, i) => f <= S.order.length && (!i || f >= S.floor[i - 1])), `${subject}: steps are unique, and an older child is assumed to know at least as much`);
+    ok(Object.values(view(subject, S.order, 2, {})).every(k => k === 0) || S.floor[0] > 0, `${subject}: a two-year-old starts at the beginning`);
+  }
+  ok(view('numbers', SUBJECTS.numbers.order, 4, {}).q3 === KNOWN && view('numbers', SUBJECTS.numbers.order, 4, {}).q4 === 0 && view('numbers', SUBJECTS.numbers.order, 2, { q1: 3 }).q1 === 3, 'age gives a head start; what was learned here counts on top');
+  ok(inPlay(view('numbers', SUBJECTS.numbers.order, 2, {}), SUBJECTS.numbers.order, 2).join() === 'q1,q2' && inPlay({ q1: 2, q2: 2 }, SUBJECTS.numbers.order, 2).includes('q3'), 'numbers start with one and two; three comes when they are known');
+  for (const [subject, S] of Object.entries(SUBJECTS).filter(([name]) => MAKERS[name])) for (const item of S.order) for (const k of [0, 1, 2, 3]) for (const n of [2, 3]) {
+    const q = MAKERS[subject](item, k, n, S.order.filter(x => x !== item).slice(0, 4));
+    ok(q.text && q.ask.length && q.yes && typeof q.praise === 'function', `${subject}/${item}: a question, an answer and a way to say well done`);
+    ok(q.right.node instanceof Node && q.wrong.length >= 1 && q.wrong.length <= n - 1 && q.wrong.every(w => w.node instanceof Node && w.oops), `${subject}/${item}: one right picture and one or two wrong ones, each with its name`);
+  }
+  ok(some(byName('duck'), 3, false) === 'three ducks' && some(byName('duck'), 1, false, true) === 'just one duck' && some(byName('cow'), 1, true) === 'une vache' && some(byName('duck'), 2, true) === 'deux canards' && some(byName('cow'), 1, true, true) === 'une seule vache', 'three ducks, une vache');
+  ok(COUNTABLE.every(en => /^l[ea] /.test(byName(en).names[1])) && COUNTABLE.slice(0, 7).every(en => byName(en).names[1].startsWith('le ')), 'counting animals take a plain plural; the first seven are "le"');
+  ok(sized(byName('duck'), true, true) === 'le grand canard' && sized(byName('cat'), false, false) === 'the small cat', 'big and small');
+  ok(whereIs(byName('cow'), true) === 'Où est la vache ?' && whereIs(byName('cow'), false) === 'Where is the cow?' && whichBall(byName('red'), false) === 'Which ball is red?', 'any sentence in either language');
   // mouse levels
   const rule = RULES.click;
   ok(nextLevel({}, { misses: 0, secs: 5 }, rule).streak === 1 && nextLevel({ lvl: 1, streak: 1 }, { misses: 0, secs: 5 }, rule).lvl === 2, 'two smooth pages lift the level');
@@ -1132,10 +1533,12 @@ if (location.hash === '#test') {
   ok(!timeUp(9e9), 'no limit means no end');
   [me.minutes, sessionStart] = mine;
   // words
-  ok(Object.values(TX).every(pair => pair.length === 2 && pair.every(x => x.length)) && Object.values(ACTS).every(a => [a.name, a.sub, a.age].every(pair => pair.length === 2 && pair.every(Boolean))), 'every word exists in both languages');
-  ok(the({ img: 'x', name: FR ? 'la vache' : 'cow' }) === (FR ? 'la vache' : 'the cow') && the({ img: '', name: 'orange' }) === (FR ? "l'orange" : 'orange'), 'articles');
+  ok(Object.values(TX).every(pair => pair.length === 2 && pair.every(x => x.length)), 'every word exists in both languages');
+  ok(Object.values(ACTS).every(a => [a.name, a.sub, a.age, a.help, a.why].every(pair => pair?.length === 2 && pair.every(Boolean)) && a.from >= 1.5 && (!a.tip || a.tip.every(Boolean))), 'every activity is named, dated and explained in both languages');
+  ok(Object.values(ACTS).every(a => /\(.*\d{4}.*\)/.test(a.why[0]) && /\(.*\d{4}.*\)/.test(a.why[1])), 'every explanation names its sources');
+  ok(the(keyInfo('KeyQ')) === (FR ? 'la vache' : 'the cow') && the(keyInfo('Digit5')) === (FR ? "l'orange" : 'orange'), 'articles');
   ok(ALL.every(code => [0, 1, 2, 3].every(turn => !askFor(keyInfo(code), turn).includes('{'))), 'every question for the grown-up is complete');
-  ok(askFor({ img: '', name: 'orange' }, 0).includes(FR ? "d'orange" : 'orange'), 'elision');
+  ok(askFor(keyInfo('Digit5'), 0).includes(FR ? "d'orange" : 'orange'), 'elision');
   // every photo and clip must really exist next to this page
   const files = [...ANIMALS.map(([, en]) => `img/${en}.jpg`), ...[...CLIPS].map(a => `snd/${a}.mp3`)];
   Promise.all(files.map(f => fetch(f, { method: 'HEAD' }).then(r => ok(r.ok, `${f} exists`), () => ok(false, `${f} exists`)))).then(() => {
