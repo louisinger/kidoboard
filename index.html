@@ -4,43 +4,179 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kidoboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ffcc2e'/%3E%3Crect x='12' y='20' width='40' height='32' rx='9' fill='%23b4add9'/%3E%3Crect x='12' y='12' width='40' height='32' rx='9' fill='%23fff'/%3E%3C/svg%3E">
 <style>
-  html, body { margin: 0; height: 100%; overflow: hidden; user-select: none; cursor: none; }
-  body { font-family: "Arial Rounded MT Bold", system-ui, sans-serif; background: #14142b; color: #fff; transition: background 0.5s; display: grid; place-items: center; }
-  #stage { display: grid; place-items: center; gap: 2vmin; text-align: center; }
-  #emoji { font-size: 50vmin; line-height: 1.1; }
-  #photo { display: none; height: 56vmin; width: min(90vw, 80vmin); object-fit: cover; border-radius: 4vmin; box-shadow: 0 2vmin 6vmin rgba(0,0,0,.4); }
-  #word { font-size: 14vmin; font-weight: 900; text-shadow: 0 0.4vmin 1vmin rgba(0,0,0,.35); }
-  .pop { animation: pop .7s cubic-bezier(.3,1.6,.5,1); }
+  /* Everything you can press is a chunky key: a flat face on a thick edge that sinks when pressed. */
+  :root {
+    --ink: #221b4a; --sun: #ffcc2e; --tomato: #d9381e; --sky: #2a6ee0; --leaf: #0f8552; --grape: #7b4bd1; --rose: #d93a78; --teal: #0b827d;
+    font-family: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", "Nunito", "Varela Round", system-ui, sans-serif;
+  }
+  html, body { margin: 0; min-height: 100%; }
+  body { background: var(--sun); color: var(--ink); }
+  [hidden] { display: none !important; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  button:focus-visible, a:focus-visible { outline: 4px solid var(--ink); outline-offset: 4px; }
+
+  .cap { --c: #fff; --d: 8px; position: relative; border: 0; background: var(--c); border-radius: 18px;
+         box-shadow: 0 var(--d) 0 color-mix(in oklab, var(--c) 68%, var(--ink)); transition: transform .08s, box-shadow .08s; }
+  .cap.down, button.cap:active { transform: translateY(var(--d)); box-shadow: 0 0 0 color-mix(in oklab, var(--c) 68%, var(--ink)); }
+
+  /* ---- home: laid out like a keyboard, one row of keys per track ---- */
+  #home { max-width: 1120px; margin: 0 auto; padding: clamp(20px, 4vw, 48px) clamp(16px, 4vw, 48px) 64px; }
+  .logo { display: flex; gap: clamp(4px, .9vw, 10px); margin: 0 0 20px; }
+  .logo .cap { --d: clamp(4px, .8vw, 8px); width: clamp(30px, 7.6vw, 82px); aspect-ratio: 1; border-radius: 24%; display: grid; place-items: center;
+               font-size: clamp(18px, 4.4vw, 48px); font-weight: 900; user-select: none; }
+  .tag { margin: 0; max-width: 32ch; font-size: clamp(18px, 2.2vw, 26px); font-weight: 700; line-height: 1.25; }
+  .track { margin-top: clamp(28px, 4vw, 44px); }
+  .track h2 { margin: 0; font-size: clamp(22px, 2.6vw, 32px); font-weight: 900; }
+  .track > p { margin: 4px 0 16px; max-width: 60ch; font-size: 17px; font-weight: 600; line-height: 1.4; }
+  .row { display: grid; gap: 18px; padding-bottom: 12px; }
+  .row.kb { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .row.ms { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .go { --d: 12px; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto 1fr auto; gap: 4px 12px;
+        padding: 18px 20px 16px; border-radius: 28px; color: #fff; text-align: left; }
+  .go .num { font-size: 22px; font-weight: 900; opacity: .85; }
+  .go svg { grid-row: 1 / 3; grid-column: 2; width: clamp(56px, 7vw, 84px); }
+  .go strong { align-self: end; font-size: clamp(26px, 3vw, 38px); font-weight: 900; line-height: 1; }
+  .go .sub { grid-column: 1 / 3; margin-top: 2px; font-size: 16px; font-weight: 700; line-height: 1.3; }
+  .go .prog { grid-column: 1 / 3; display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 14px; font-weight: 800; white-space: nowrap; }
+  .prog b { flex: 0 0 72px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #fff var(--p), rgba(255,255,255,.3) 0); }
+  .prog i { width: 12px; height: 12px; border-radius: 50%; border: 3px solid #fff; }
+  .prog i.on { background: #fff; }
+  .prog u { text-decoration: none; }
+  .ico { fill: none; stroke: currentColor; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+  .ico .f { fill: currentColor; }
+  .grown p { max-width: 62ch; }
+  .grown div { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; padding-bottom: 8px; }
+  .grown .cap { --d: 6px; padding: 10px 18px; border-radius: 14px; font-size: 16px; font-weight: 800; }
+  .grown a { color: inherit; font-weight: 800; }
+  @media (max-width: 820px) { .row.ms { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .row.kb { grid-template-columns: 1fr; } .go { padding: 14px 14px 12px; border-radius: 22px; } .go .sub { font-size: 15px; } .prog u { display: none; } }
+
+  /* ---- play: one full-screen page per activity, sized in vmin so it fills any screen ---- */
+  #play { --bg: var(--ink); --fg: #fff; position: fixed; inset: 0; overflow: hidden; background: var(--bg); color: var(--fg); transition: background .5s;
+          user-select: none; -webkit-user-select: none; touch-action: none; }
+  #play.kb:not(.peek), #play.kb:not(.peek) *, #play.ms, #play.ms * { cursor: none; }
+  #scene { position: absolute; inset: 0; box-sizing: border-box; }
+  #leave { --c: #fff; --d: .8vmin; position: absolute; left: 2vmin; top: 2vmin; z-index: 6; width: max(7vmin, 40px); height: max(7vmin, 40px); padding: 0; border-radius: 28%;
+           color: var(--ink); opacity: .5; overflow: hidden; display: grid; place-items: center; }
+  #leave svg { position: relative; z-index: 1; width: 62%; }
+  #leave::after { content: ''; position: absolute; inset: 0; background: var(--sun); transform-origin: bottom; scale: 1 0; }
+  #leave.holding { opacity: 1; }
+  #leave.holding::after { scale: 1 1; transition: scale 1s linear; }
+
+  .pop { animation: pop .7s cubic-bezier(.3, 1.6, .5, 1); }
   @keyframes pop { from { transform: scale(0) rotate(-20deg); } }
-  .pulse { animation: pulse 1.2s ease-in-out infinite; }
-  @keyframes pulse { 50% { transform: scale(1.15); } }
-  body.finding #emoji { font-size: 28vmin; }
-  body.finding #photo { height: 30vmin; width: 40vmin; }
-  body.finding #stage { padding-bottom: 26vmin; }
   .wiggle { animation: wiggle .3s; }
-  @keyframes wiggle { 25% { translate: -3vmin 0; } 75% { translate: 3vmin 0; } }
-  #keys { position: fixed; bottom: 3vmin; left: 50%; translate: -50% 0; display: none; flex-direction: column; gap: .6vmin; }
-  #keys div { display: flex; gap: .6vmin; justify-content: center; }
-  #keys span { width: 5vmin; height: 5vmin; border-radius: 1vmin; background: rgba(255,255,255,.25); display: grid; place-items: center; font-size: 3.4vmin; }
-  #keys .target { background: #fff; box-shadow: 0 0 3vmin #fff; animation: pulse .8s ease-in-out infinite; }
-  #mode { position: fixed; top: 2vmin; right: 2vmin; font-size: 4vmin; opacity: .35; cursor: pointer; }
+  @keyframes wiggle { 25% { transform: translateX(-3vmin); } 75% { transform: translateX(3vmin); } }
+  @keyframes pulse { 50% { transform: scale(1.12); } }
+  .caption { position: absolute; top: 3.5vmin; left: 0; right: 0; z-index: 4; text-align: center; font-size: 8vmin; font-weight: 900; line-height: 1; pointer-events: none; }
+  .burst i { position: absolute; left: 50%; top: 46%; z-index: 7; width: 3vmin; height: 3vmin; margin: -1.5vmin; border-radius: 50%; background: var(--c);
+             box-shadow: 0 0 0 .5vmin #fff; pointer-events: none; animation: fly .9s ease-out forwards; }
+  @keyframes fly { from { transform: rotate(var(--a)); } to { transform: rotate(var(--a)) translateY(-44vmin) scale(.4); opacity: 0; } }
+  .ripple { position: absolute; left: 0; top: 0; z-index: 5; width: 10vmin; height: 10vmin; margin: -5vmin; border-radius: 50%; border: .8vmin solid var(--fg);
+            box-sizing: border-box; pointer-events: none; animation: ripple .45s ease-out forwards; }
+  @keyframes ripple { from { transform: scale(.2); } to { transform: scale(1); opacity: 0; } }
+
+  /* keyboard activities: the picture on top, the keyboard mirror below */
+  .kb #scene { display: flex; flex-direction: column; align-items: center; gap: 2vmin; padding: 3vmin; }
+  .stage { flex: 1; min-height: 0; display: grid; place-content: center; justify-items: center; gap: 2.5vmin; text-align: center; }
+  .card { box-sizing: border-box; height: 40vmin; width: min(60vmin, 88vw); border: 1vmin solid #fff; border-radius: 4.5vmin; overflow: hidden; background: #fff;
+          box-shadow: 0 1.6vmin 0 rgba(0, 0, 0, .22); }
+  .card img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .card .blob { display: none; height: 100%; }
+  .card.colour { width: 40vmin; border: 2vmin solid var(--fg); border-radius: 50%; }
+  .card.colour img, .card.idle img { display: none; }
+  .card.colour .blob { display: block; }
+  .card.idle { display: grid; place-items: center; border: 0; background: none; box-shadow: none; overflow: visible; }
+  .card.idle .blob { display: block; width: 22vmin; height: 22vmin; border-radius: 5vmin; background: #fff; box-shadow: 0 2.6vmin 0 #b4add9; animation: tap 1.5s infinite; }
+  @keyframes tap { 30% { transform: translateY(2.6vmin); box-shadow: 0 0 0 #b4add9; } 55% { transform: none; } }
+  .card.asking { animation: pulse 1.6s ease-in-out infinite; }
+  .word { font-size: 10vmin; font-weight: 900; line-height: 1; }
+  .word.small { font-size: 6vmin; }
+
+  .mirror { --k: min(7.2vmin, 8.4vw); display: grid; gap: calc(var(--k) * .16); padding-bottom: calc(var(--k) * .14); }
+  .mirror div { display: flex; gap: calc(var(--k) * .16); }
+  .mirror div:nth-child(2) { margin-left: calc(var(--k) * .5); }  /* staggered like the real thing, so places match */
+  .mirror div:nth-child(3) { margin-left: calc(var(--k) * .8); }
+  .mirror div:nth-child(4) { margin-left: calc(var(--k) * 1.35); }
+  .key { --d: calc(var(--k) * .12); width: var(--k); height: var(--k); padding: 0; border-radius: 24%; overflow: hidden; transition: transform .08s, box-shadow .08s, opacity .4s; }
+  .key img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .key i { position: absolute; left: 0; top: 0; min-width: 44%; padding: 0 6%; box-sizing: border-box; border-radius: 0 0 36% 0; background: #fff; color: var(--ink);
+           font-size: calc(var(--k) * .28); font-weight: 900; font-style: normal; line-height: 1.35; text-align: center; }
+  .key.out { opacity: .22; }
+  .key.on { transform: translateY(var(--d)); box-shadow: 0 0 0 calc(var(--k) * .1) #fff; z-index: 1; }
+  .key.target { z-index: 2; box-shadow: 0 0 0 calc(var(--k) * .1) #fff, 0 0 calc(var(--k) * .7) calc(var(--k) * .2) #fff; animation: pulse .8s ease-in-out infinite; }
+
+  /* mouse activities: a big pointer, and a little mouse on its mat that mirrors the hand */
+  .ms #scene { display: grid; place-content: center; justify-items: center; gap: 5vmin; }
+  .cursor { position: absolute; left: 0; top: 0; z-index: 9; width: 8vmin; pointer-events: none; transform-origin: 10% 6%; transition: scale .08s;
+            filter: drop-shadow(0 .7vmin 0 rgba(0, 0, 0, .25)); }
+  .cursor.down { scale: .8; }
+  .cursor svg, .mousey svg { display: block; overflow: visible; }
+  .cursor path, .mousey path, .mousey rect { fill: #fff; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+  .mousey { position: absolute; right: 3vmin; bottom: 3vmin; z-index: 5; width: 17vmin; height: 17vmin; border-radius: 4vmin; display: grid; place-items: center;
+            background: color-mix(in oklab, var(--fg) 18%, transparent); pointer-events: none; }
+  .mousey svg { height: 10.5vmin; }
+  .mousey.left .l, .mousey.right .r { fill: var(--sun); }
+  @media (max-aspect-ratio: 1/1) { .mousey { display: none; } }
+
+  .sleeper { --s: 20vmin; position: absolute; z-index: 1; width: var(--s); height: var(--s); margin: calc(var(--s) / -2); border-radius: 50%; overflow: hidden; }
+  .sleeper img, .flap img, .choice img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .sleeper.awake { z-index: 3; box-shadow: 0 0 0 1vmin #fff, 0 0 6vmin 2vmin rgba(255, 204, 46, .75); animation: pop .7s cubic-bezier(.3, 1.6, .5, 1); }
+  .dark { position: absolute; inset: 0; z-index: 2; pointer-events: none; transition: opacity 1.6s;
+          background: radial-gradient(circle var(--r) at var(--x, 50%) var(--y, 50%), rgba(255, 204, 46, .1) 40%, rgba(255, 204, 46, .32) 58%, rgba(34, 27, 74, .97) 100%); }
+  .dark.dawn { opacity: 0; }
+
+  .flaps, .choices { display: flex; flex-wrap: wrap; justify-content: center; gap: 4vmin; }
+  .flap { --d: 1.6vmin; width: var(--s); height: var(--s); padding: 0; border-radius: 22%; overflow: hidden; }
+  .flap::before, .flap::after { content: ''; position: absolute; top: 36%; left: 27%; width: 17%; aspect-ratio: 1; border-radius: 50%;
+                                background: radial-gradient(circle at 50% 62%, var(--ink) 34%, #fff 37%); transition: opacity .2s; }
+  .flap::after { left: 56%; }
+  .flap img { opacity: 0; scale: .5; transition: opacity .25s, scale .35s cubic-bezier(.3, 1.6, .5, 1); }
+  .flap.open { --c: #fff; }
+  .flap.open img { opacity: 1; scale: 1; }
+  .flap.open::before, .flap.open::after { opacity: 0; }
+
+  .shelf { position: absolute; left: 0; right: 0; bottom: 7vmin; display: flex; justify-content: center; gap: 4vmin; }
+  .basket { --d: 1.8vmin; width: 28vmin; height: 19vmin; border-radius: 3vmin 3vmin 7vmin 7vmin; transition: scale .15s; }
+  .basket::before { content: ''; position: absolute; inset: 1.8vmin 2vmin auto; height: 5.5vmin; border-radius: 50%; background: color-mix(in oklab, var(--c) 55%, var(--ink)); }
+  .basket.open { scale: 1.12; }
+  .ball { --b: 18vmin; position: absolute; left: 0; top: 0; z-index: 4; width: var(--b); height: var(--b); margin: calc(var(--b) / -2); border-radius: 50%; background: var(--c);
+          box-shadow: inset 0 -1.4vmin 0 rgba(0, 0, 0, .18), 0 0 0 .6vmin #fff, 0 1.4vmin 0 .6vmin rgba(34, 27, 74, .18); }
+  .ball.glide { transition: translate .45s cubic-bezier(.3, 1.3, .5, 1), scale .45s, opacity .45s; }
+  .ball.held { scale: 1.12; }
+  .ball.in { scale: .45; opacity: 0; }
+
+  .ear { --d: 1.4vmin; width: 16vmin; height: 16vmin; padding: 0; border-radius: 50%; color: var(--teal); display: grid; place-items: center; }
+  .ear svg { width: 58%; }
+  .choices { --s: min(30vmin, 21vw); max-width: 96vw; }
+  .choice { --d: 1.6vmin; width: var(--s); height: var(--s); padding: 1vmin; border-radius: 4.5vmin; transition: transform .08s, box-shadow .08s, opacity .4s, scale .3s, filter .4s; }
+  .choice img { border-radius: 3.5vmin; }
+  .choice.no { opacity: .35; filter: grayscale(1); }
+  .choice.yes { scale: 1.1; z-index: 1; }
+  .choices.done .choice:not(.yes) { opacity: .2; }
+  @media (max-aspect-ratio: 1/1) { .choices { --s: 40vmin; } }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
-<div id="stage"><div id="emoji" class="pulse">⌨️</div><img id="photo" alt=""><div id="word"></div></div>
-<div id="keys"></div>
-<div id="mode" title="free play / find the animal">🎲</div>
+<main id="home"></main>
+<div id="play" hidden>
+  <div id="scene"></div>
+  <button id="leave" class="cap" tabindex="-1" aria-label="Home"><svg class="ico" viewBox="0 0 64 64"><path d="M8 31 32 11l24 20M16 27v25h32V27"/></svg></button>
+</div>
 <script>
 // ---- content: a key is always the same animal or colour, so a small kid can learn where "the cow" lives ----
 
-const FR = navigator.language.startsWith('fr');
 const ROWS = [
   ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'],
   ['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP'],
   ['KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL'],
   ['KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM'],
 ];
+const ALL = ROWS.flat(), LETTERS = ROWS.slice(1).flat();
 // [emoji, english name (also the photo/clip file name), english sound, french name, french sound]
 // The spoken sound is only used for animals without a real clip in snd/.
 const ANIMALS = [
@@ -62,7 +198,16 @@ const COLORS = [
   ['🟢', '#43a047', 'green', 'vert'], ['🟠', '#fb8c00', 'orange', 'orange'], ['🟣', '#8e24aa', 'purple', 'violet'],
   ['🩷', '#f06292', 'pink', 'rose'], ['🟤', '#6d4c41', 'brown', 'marron'], ['⚫', '#111111', 'black', 'noir'], ['⚪', '#f5f5f5', 'white', 'blanc', '#333'],
 ];
-const BG = ['#e53935', '#1e88e5', '#43a047', '#fb8c00', '#8e24aa', '#00897b', '#f06292']; // backgrounds for animals, rotating
+const BG = ['tomato', 'sky', 'leaf', 'grape', 'rose', 'teal'].map(name => `var(--${name})`); // backgrounds for animals, rotating
+const NIGHT = 'var(--ink)';
+
+// ---- the learner: what this kid has met, knows and can do, kept in this browser ----
+
+const fresh = () => ({ seen: {}, know: {}, wins: {} });
+let me = fresh();
+try { me = { ...fresh(), ...JSON.parse(localStorage.kido || '{}') }; } catch {}
+const save = () => { try { localStorage.kido = JSON.stringify(me); } catch {} };
+let FR = (me.lang || navigator.language).startsWith('fr');
 
 function keyInfo(code) {
   const r = ROWS.findIndex(row => row.includes(code));
@@ -70,11 +215,11 @@ function keyInfo(code) {
   const c = ROWS[r].indexOf(code);
   if (r === 0) {
     const [emoji, bg, en, fr, fg = '#fff'] = COLORS[c];
-    return { code, emoji, bg, fg, name: FR ? fr : en, sound: '', img: '', clip: '' };
+    return { code, emoji, bg, fg, en, name: FR ? fr : en, sound: '', img: '', clip: '' };
   }
   const n = ROWS.slice(1, r).reduce((a, row) => a + row.length, 0) + c;
   const [emoji, en, enSound, fr, frSound] = ANIMALS[n];
-  return { code, emoji, bg: BG[n % BG.length], fg: '#fff', name: FR ? fr : en, sound: FR ? frSound : enSound,
+  return { code, emoji, bg: BG[n % BG.length], fg: '#fff', en, name: FR ? fr : en, sound: FR ? frSound : enSound,
            img: `img/${en}.jpg`, clip: CLIPS.has(en) ? `snd/${en}.mp3` : '' };
 }
 
@@ -82,156 +227,587 @@ function keyInfo(code) {
 const STAGE_MS = 1500;
 const accept = (now, last) => now - last >= STAGE_MS;
 
+// Find starts with three friends and adds one each time one is known; the rest wait their turn, familiar ones first.
+const INTRO = (() => {
+  const first = ['cow', 'cat', 'dog', 'red', 'duck', 'blue', 'pig', 'yellow', 'sheep', 'green', 'horse'].map(en => ALL.find(code => keyInfo(code).en === en));
+  const colours = ROWS[0].filter(code => !first.includes(code));
+  return [...first, ...LETTERS.filter(code => !first.includes(code)).flatMap((code, i) => i % 3 === 2 ? [code, colours.shift()] : [code]), ...colours].filter(Boolean);
+})();
+const START = 3, KNOWN = 2; // a key is "known" once found twice with less and less help
+const inPlay = know => INTRO.slice(0, START + INTRO.filter(code => know[code] >= KNOWN).length);
+// the less a key is known, the more often it comes back; never the same question twice in a row
+function pick(know, last, rnd = Math.random) {
+  const pool = inPlay(know).filter(code => code !== last), weight = code => 4 - (know[code] || 0);
+  let r = rnd() * pool.reduce((sum, code) => sum + weight(code), 0);
+  return pool.find(code => (r -= weight(code)) < 0) ?? pool.at(-1);
+}
+// help fades as the key is learned: it glows at once, then after 4 s, 9 s, 15 s
+const hintDelay = know => [0, 4000, 9000, 15000][know];
+// found without help: one step up (following the glow counts for a brand-new key). A wrong key first: one step down. Found with help: no change.
+const grade = (know, { wrong, hinted }) => wrong ? Math.max(0, know - 1) : !hinted || know === 0 ? Math.min(3, know + 1) : know;
+
+// Mouse steps get harder twice: `per` finished pages lift the level, up to 3. Nothing ever takes a level back.
+const LEVELS = {
+  move:   { per: 2, spec: [{ n: 3, size: 24, light: 26, dwell: 0 }, { n: 4, size: 20, light: 20, dwell: 0 }, { n: 5, size: 17, light: 15, dwell: 350 }] },
+  click:  { per: 3, spec: [{ n: 2, size: 36 }, { n: 4, size: 28 }, { n: 6, size: 24 }] },
+  drag:   { per: 2, spec: [{ n: 1 }, { n: 2 }, { n: 3 }] },
+  choose: { per: 4, spec: [{ n: 2 }, { n: 3 }, { n: 4 }] },
+};
+const level = (wins, per) => Math.min(3, 1 + Math.floor((wins || 0) / per));
+const spec = name => LEVELS[name].spec[level(me.wins[name], LEVELS[name].per) - 1];
+const win = name => { me.wins[name] = (me.wins[name] || 0) + 1; save(); };
+const meet = code => { me.seen[code] = (me.seen[code] || 0) + 1; save(); };
+
+// ---- words: [english, french] ----
+
+const TX = {
+  tag: ['A first keyboard and a first mouse, one animal at a time.', 'Un premier clavier et une première souris, un animal à la fois.'],
+  kb: ['The keyboard', 'Le clavier'],
+  kbSub: ['Every key is always the same animal or colour, so a child learns where the cow lives.', 'Chaque touche est toujours le même animal ou la même couleur : on apprend où habite la vache.'],
+  ms: ['The mouse', 'La souris'],
+  msSub: ['Four small steps: move it, click with it, drag with it, choose with it.', 'Quatre petites étapes : la bouger, cliquer, glisser, puis choisir.'],
+  met: ['of 36 met', 'sur 36 rencontrés'], known: ['of 36 known', 'sur 36 connus'], lvl: ['Level', 'Niveau'], of: ['of', 'sur'],
+  grown: ['For grown-ups', 'Pour les grands'],
+  back: ['To come back here, hold Esc or hold the house button for one second.', 'Pour revenir ici, maintenez Échap ou le bouton maison pendant une seconde.'],
+  full: ['Activities open in full screen so small hands stay inside the page. Progress is saved in this browser only.',
+         'Les activités s’ouvrent en plein écran pour que les petites mains restent dans la page. Les progrès sont enregistrés dans ce navigateur uniquement.'],
+  lang: ['Passer en français', 'Switch to English'],
+  reset: ['Erase progress', 'Effacer les progrès'],
+  resetAsk: ['Erase everything your child has learned so far?', 'Effacer tout ce que votre enfant a appris jusqu’ici ?'],
+  credits: ['Photo and sound credits', 'Crédits photos et sons'],
+  pressAny: ['Press a key', 'Appuie sur une touche'],
+  yes: ['Yes!', 'Bravo !'],
+  moveIt: ['Move the mouse. Wake up the animals!', 'Bouge la souris. Réveille les animaux !'],
+  morning: ['Good morning!', 'Bonjour !'],
+  clickIt: ['Click on a key. Who is hiding?', 'Clique sur une touche. Qui se cache ?'],
+  dragIt: ['Catch the ball, and put it in the basket.', 'Attrape la balle, et mets-la dans le panier.'],
+  who: ['Who makes this sound?', 'Qui fait ce bruit ?'],
+};
+const t = key => TX[key][+FR];
+// "the cow" / "la vache", "red" / "le rouge"
+const the = info => info.img ? (FR ? info.name : `the ${info.name}`) : FR ? (/^[aeiou]/.test(info.name) ? "l'" : 'le ') + info.name : info.name;
+const whereIs = info => FR ? `Où est ${the(info)} ?` : `Where is ${the(info)}?`;
+const thatIs = info => FR ? `Ça, c'est ${the(info)}.` : `That's ${the(info)}.`;
+
 // ---- sound: a soft chime per press, the browser voice for names, a real recording for the animal ----
 
 let ctx;
 function chime(freq, dur = 0.5) {
   ctx ??= new AudioContext();
   if (ctx.state === 'suspended') ctx.resume();
-  const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+  const now = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
   o.type = 'triangle';
   o.frequency.value = freq;
-  g.gain.setValueAtTime(0.4, t);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  g.gain.setValueAtTime(0.4, now);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
   o.connect(g).connect(ctx.destination);
-  o.start(t);
-  o.stop(t + dur);
+  o.start(now);
+  o.stop(now + dur);
 }
 const PENTA = [523, 587, 659, 784, 880];
 const tick = () => chime(1200, 0.08);
 const cheer = () => PENTA.forEach((f, i) => setTimeout(() => chime(f * 2, 0.4), i * 90));
 
-let clip;
+let clip, saying = 0;
 // ponytail: browser voice for the names, quality varies by OS; recorded names if it sounds bad
 function say(texts, then) {
+  const mine = ++saying, done = () => { if (mine === saying) then?.(); }; // a newer sentence cancels what was queued after this one
   clip?.pause();
   texts = texts.filter(Boolean);
-  if (!window.speechSynthesis || !texts.length) return then?.();
+  if (!window.speechSynthesis || !texts.length) return done();
   speechSynthesis.cancel();
   texts.forEach((text, i) => {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = FR ? 'fr-FR' : 'en-US';
     u.rate = 0.85;
-    if (i === texts.length - 1 && then) u.onend = then;
+    if (i === texts.length - 1) u.onend = u.onerror = done;
     speechSynthesis.speak(u);
   });
 }
+// a missing or blocked recording falls back to the spoken "moo"
+function playClip(info) {
+  clip?.pause();
+  clip = new Audio(info.clip);
+  clip.play().catch(() => say([info.sound]));
+}
 // the name first, then the animal itself (its recording, or the spoken "moo")
-const voice = (info, prefix = '') => info.clip
-  ? say([prefix, info.name], () => { clip = new Audio(info.clip); clip.play().catch(() => {}); })
-  : say([prefix, info.name, info.sound]);
+const voice = (info, prefix = '') => info.clip ? say([prefix, info.name], () => playClip(info)) : say([prefix, info.name, info.sound]);
+function quiet() { saying++; clip?.pause(); window.speechSynthesis?.cancel(); }
 
-// ---- stage ----
+// ---- small tools ----
 
-const $ = id => document.getElementById(id);
-function stage(info) {
-  document.body.style.background = info.bg;
-  document.body.style.color = info.fg;
-  $('emoji').style.display = info.img ? 'none' : 'block';
-  $('photo').style.display = info.img ? 'block' : 'none';
-  $('emoji').textContent = info.emoji;
-  if (info.img) $('photo').src = info.img;
-  $('word').textContent = info.name;
-}
-function show(info) {
-  stage(info);
-  for (const el of [$('emoji'), $('photo')]) {
-    el.className = 'pop';
-    el.getAnimations().forEach(a => { a.cancel(); a.play(); });
+const $ = (sel, root = document) => root.querySelector(sel);
+const el = (tag, props = {}, ...kids) => { const node = Object.assign(document.createElement(tag), props); node.append(...kids); return node; };
+const css = (node, name, value) => (node.style.setProperty(name, value), node);
+const rand = (a, b) => a + Math.random() * (b - a);
+const shuffle = list => list.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(([, x]) => x);
+const vmin = n => n * Math.min(innerWidth, innerHeight) / 100;
+const again = (node, cls) => { node.classList.remove(cls); void node.offsetWidth; node.classList.add(cls); }; // replay a css animation
+const ico = body => `<svg class="ico" viewBox="0 0 64 64" aria-hidden="true">${body}</svg>`;
+const POINTER = 'M14 8v34l9-8 6 14 7-3-6-14h12z';
+
+// ---- the activities: two for the keyboard, then four steps for the mouse ----
+
+const ACTS = {
+  explore: { track: 'kb', color: 'tomato', start: startExplore, name: ['Press', 'Appuyer'],
+             sub: ['Any key shows its animal, says its name and plays its call.', 'Chaque touche montre son animal, dit son nom et joue son cri.'],
+             icon: '<rect x="12" y="36" width="40" height="19" rx="7"/><path d="M32 8v17m-8-8 8 8 8-8"/>' },
+  find:    { track: 'kb', color: 'sky', start: startFind, name: ['Find', 'Trouver'],
+             sub: ['Where is the cow? The key lights up less and less as they learn.', 'Où est la vache ? La touche s’allume de moins en moins.'],
+             icon: '<circle cx="27" cy="27" r="16"/><path d="m39 39 16 16"/>' },
+  move:    { track: 'ms', color: 'grape', start: startMove, name: ['Move', 'Bouger'],
+             sub: ['Sweep the lamp over the night to wake the animals. No clicking.', 'Promener la lampe dans la nuit pour réveiller les animaux. Sans cliquer.'],
+             icon: `<path class="f" d="${POINTER}"/><path d="M46 12c6 5 9 12 9 20M50 54c3-3 5-6 6-10"/>` },
+  click:   { track: 'ms', color: 'leaf', start: startClick, name: ['Click', 'Cliquer'],
+             sub: ['Someone hides under each big key. Click to see who.', 'Quelqu’un se cache sous chaque grosse touche. Un clic pour voir.'],
+             icon: `<path class="f" transform="translate(12 10)" d="${POINTER}"/><path d="M17 18H7M26 9V3M18 11l-7-7"/>` },
+  drag:    { track: 'ms', color: 'rose', start: startDrag, name: ['Drag', 'Glisser'],
+             sub: ['Carry each ball to the basket of its colour.', 'Porter chaque balle dans le panier de sa couleur.'],
+             icon: '<circle class="f" cx="15" cy="15" r="9"/><path stroke-dasharray="1 10" d="M29 19c9 3 14 9 16 17"/><path d="M32 44h26l-4 14H36z"/>' },
+  choose:  { track: 'ms', color: 'teal', start: startChoose, name: ['Choose', 'Choisir'],
+             sub: ['Listen to an animal, then click its photo.', 'Écouter un animal, puis cliquer sur sa photo.'],
+             icon: '<path class="f" d="M7 25h10l13-10v34L17 39H7z"/><path d="M40 24c4 4 4 12 0 16M47 16c9 8 9 24 0 32"/>' },
+};
+const SOUND = ico(ACTS.choose.icon);
+
+// ---- home ----
+
+function progress(name) {
+  if (name === 'explore' || name === 'find') {
+    const n = ALL.filter(code => name === 'find' ? me.know[code] >= KNOWN : me.seen[code]).length;
+    return `<b style="--p:${n / ALL.length * 100}%"></b>${n} ${t(name === 'find' ? 'known' : 'met')}`;
   }
+  const l = level(me.wins[name], LEVELS[name].per);
+  return [1, 2, 3].map(i => `<i${i <= l ? ' class="on"' : ''}></i>`).join('') + `<span>${t('lvl')} ${l}<u> ${t('of')} 3</u></span>`;
+}
+function renderHome() {
+  document.documentElement.lang = FR ? 'fr' : 'en';
+  const track = kind => `<section class="track"><h2>${t(kind)}</h2><p>${t(kind + 'Sub')}</p><div class="row ${kind}">${
+    Object.entries(ACTS).filter(([, a]) => a.track === kind).map(([name, a], i) =>
+      `<button class="cap go" data-act="${name}" style="--c:var(--${a.color})"><span class="num">${i + 1}</span>${ico(a.icon)}<strong>${a.name[+FR]}</strong>` +
+      `<span class="sub">${a.sub[+FR]}</span><span class="prog">${progress(name)}</span></button>`).join('')}</div></section>`;
+  $('#home').innerHTML = `<header><h1 class="logo" aria-label="Kidoboard">${[...'kidoboard'].map(ch => `<span class="cap" aria-hidden="true">${ch}</span>`).join('')}</h1>
+    <p class="tag">${t('tag')}</p></header>${track('kb')}${track('ms')}
+    <section class="track grown"><h2>${t('grown')}</h2><p>${t('back')} ${t('full')}</p>
+    <div><button class="cap" id="lang">${t('lang')}</button><button class="cap" id="reset">${t('reset')}</button><a href="https://github.com/louisinger/kidoboard/blob/main/CREDITS.md" target="_blank" rel="noopener">${t('credits')}</a></div></section>`;
+}
+$('#home').addEventListener('click', e => {
+  const go = e.target.closest('.go');
+  if (go) return openAct(go.dataset.act);
+  if (e.target.id === 'lang') { FR = !FR; me.lang = FR ? 'fr' : 'en'; save(); renderHome(); }
+  if (e.target.id === 'reset' && confirm(t('resetAsk'))) { me = { ...fresh(), lang: me.lang }; save(); renderHome(); }
+});
+$('#home').addEventListener('pointerdown', e => { // the name is made of keys, and keys are for pressing
+  const cap = e.target.closest('.logo .cap');
+  if (!cap) return;
+  chime(PENTA[[...cap.parentNode.children].indexOf(cap) % PENTA.length]);
+  cap.classList.add('down');
+  setTimeout(() => cap.classList.remove('down'), 160);
+});
+
+// ---- play: opening, leaving and the bits every activity shares ----
+
+const play = $('#play'), scene = $('#scene'), leave = $('#leave');
+let act = null, onKey = null, cleanup = [];
+const later = (fn, ms) => { const id = setTimeout(fn, ms); cleanup.push(() => clearTimeout(id)); return id; };
+const on = (node, type, fn) => { node.addEventListener(type, fn); cleanup.push(() => node.removeEventListener(type, fn)); };
+const paint = (bg, fg = '#fff') => { css(play, '--bg', bg); css(play, '--fg', fg); };
+
+// Each page of an activity is mounted from scratch: timers and listeners of the previous page are dropped first.
+function mount(name, first = false) {
+  cleanup.forEach(fn => fn());
+  cleanup = [];
+  onKey = null;
+  act = name;
+  scene.replaceChildren();
+  play.className = `${ACTS[name].track} ${name}`;
+  paint(NIGHT);
+  ACTS[name].start(first);
+}
+function openAct(name) {
+  $('#home').hidden = true;
+  play.hidden = false;
+  // Fullscreen + (Chrome/Edge) keyboard lock keep small hands inside the page.
+  Promise.resolve(document.documentElement.requestFullscreen?.()).then(() => navigator.keyboard?.lock?.()).catch(() => {});
+  mount(name, true);
+}
+function goHome() {
+  cleanup.forEach(fn => fn());
+  cleanup = [];
+  act = onKey = null;
+  quiet();
+  holdEnd();
+  scene.replaceChildren();
+  play.hidden = true;
+  navigator.keyboard?.unlock?.();
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  renderHome();
+  $('#home').hidden = false;
 }
 
-// ---- find mode: "where is the cow?" with the key glowing on a little keyboard ----
+// Leaving takes a one-second hold, on Esc or on the house: a parent can do it, a stray tap cannot.
+const HOLD_MS = 1000;
+let holding;
+function holdStart() { holdEnd(); leave.classList.add('holding'); holding = setTimeout(goHome, HOLD_MS); }
+function holdEnd() { clearTimeout(holding); leave.classList.remove('holding'); }
+leave.addEventListener('pointerdown', holdStart);
+for (const type of ['pointerup', 'pointerleave', 'pointercancel']) leave.addEventListener(type, holdEnd);
 
-let finding = false, target = null;
-$('keys').append(...ROWS.map(row => {
-  const div = document.createElement('div');
-  div.append(...row.map(code => Object.assign(document.createElement('span'), { id: code, textContent: keyInfo(code).emoji })));
-  return div;
-}));
+function caption(text) {
+  const node = $('.caption') || scene.appendChild(el('div', { className: 'caption' }));
+  node.textContent = text;
+  again(node, 'pop');
+}
+function burst() {
+  const node = el('div', { className: 'burst' }, ...Array.from({ length: 14 }, (_, i) => css(css(el('i'), '--a', `${i * 360 / 14}deg`), '--c', BG[i % BG.length])));
+  play.append(node);
+  setTimeout(() => node.remove(), 1000);
+}
+function wiggle(node) { again(node, 'wiggle'); }
 
-function ask() {
-  const all = ROWS.flat().filter(code => code !== target?.code);
-  target = keyInfo(all[Math.floor(Math.random() * all.length)]);
-  document.querySelectorAll('#keys .target').forEach(el => el.classList.remove('target'));
-  $(target.code).classList.add('target');
-  stage({ ...target, bg: '#14142b', fg: '#fff', name: '?' });
-  $('emoji').className = $('photo').className = 'pulse';
-  say([FR ? `Où est ${target.name} ?` : `Where is the ${target.name}?`]);
+// ---- keyboard activities ----
+
+// The mirror: a little keyboard on screen with the same places as the real one. What the hand presses lights up here.
+let layout = null; // the letters printed on this very keyboard, where the browser can tell (Chrome, Edge)
+navigator.keyboard?.getLayoutMap?.().then(map => { layout = map; document.querySelectorAll('.key i').forEach(i => { i.textContent = legend(i.parentNode.id); }); }).catch(() => {});
+const AZERTY = { KeyQ: 'a', KeyW: 'z', KeyA: 'q', KeyZ: 'w', KeyM: ',' };
+const legend = code => code.startsWith('Digit') ? code.slice(5) : (layout?.get(code) || (FR && AZERTY[code]) || code.slice(3)).toUpperCase();
+function mirror() {
+  return el('div', { className: 'mirror' }, ...ROWS.map(row => el('div', {}, ...row.map(code => {
+    const info = keyInfo(code), cap = css(el('button', { className: 'cap key', id: code, tabIndex: -1 }), '--c', info.img ? '#fff' : info.bg);
+    if (info.img) cap.append(el('img', { src: info.img, alt: '' }));
+    cap.append(el('i', { textContent: legend(code) }));
+    return cap;
+  }))));
+}
+function stageKit() {
+  scene.append(el('div', { className: 'stage' }, el('div', { className: 'card idle' }, el('img', { alt: '' }), el('div', { className: 'blob' })), el('div', { className: 'word small' })), mirror());
+  on(scene, 'pointerdown', e => { const cap = e.target.closest('.key'); if (cap) onKey?.(cap.id, performance.now()); }); // a tap on the mirror is a press too (tablets)
+  let hide;
+  on(play, 'pointermove', e => { if (e.pointerType !== 'mouse') return; play.classList.add('peek'); clearTimeout(hide); hide = later(() => play.classList.remove('peek'), 2000); });
+}
+function put(info, text = info.name, bg = info.bg, fg = info.fg) {
+  paint(bg, fg);
+  $('.card').className = info.img ? 'card' : 'card colour';
+  if (info.img) $('.card img').src = info.img; else $('.card .blob').style.background = info.bg;
+  $('.word').className = 'word';
+  $('.word').textContent = text;
+}
+function light(code) {
+  document.querySelectorAll('.key.on').forEach(cap => cap.classList.remove('on'));
+  $('#' + code).classList.add('on');
+  later(() => $('#' + code)?.classList.remove('on'), STAGE_MS);
 }
 
-function setMode(find) {
-  finding = find;
-  $('mode').textContent = find ? '🔍' : '🎲';
-  $('keys').style.display = find ? 'flex' : 'none';
-  document.body.classList.toggle('finding', find);
-  try { localStorage.mode = find ? 'find' : 'free'; } catch {}
-  if (find) ask(); else { target = null; stage({ emoji: '⌨️', name: '', bg: '#14142b', fg: '#fff' }); }
+function startExplore(first) {
+  stageKit();
+  $('.word').textContent = t('pressAny');
+  if (first) say([t('pressAny')]);
+  let last = -Infinity, lastInfo = null;
+  onKey = (code, now) => {
+    if (!accept(now, last)) return;
+    last = now;
+    const info = code === 'Space' ? lastInfo : keyInfo(code);
+    if (!info) return tick();
+    lastInfo = info;
+    meet(info.code);
+    chime(PENTA[ALL.indexOf(info.code) % PENTA.length]);
+    put(info);
+    again($('.card'), 'pop');
+    light(info.code);
+    voice(info);
+  };
 }
-$('mode').onclick = () => setMode(!finding);
+
+// "where is the cow?": the key glows on the mirror, at once for a new friend, later and later for an old one
+function startFind() {
+  stageKit();
+  let last = -Infinity, q = null, hintTimer;
+  const hint = () => { q.hinted = true; $('#' + q.code).classList.add('target'); };
+  function ask() {
+    q = { code: pick(me.know, q?.code), wrong: false, hinted: false };
+    const info = keyInfo(q.code), live = inPlay(me.know);
+    document.querySelectorAll('.key').forEach(cap => { cap.classList.remove('target', 'on'); cap.classList.toggle('out', !live.includes(cap.id)); });
+    put(info, info.name + (FR ? ' ?' : '?'), NIGHT, '#fff');
+    $('.card').classList.add('asking');
+    say([whereIs(info)]);
+    hintTimer = later(hint, hintDelay(me.know[q.code] || 0));
+  }
+  onKey = (code, now) => {
+    if (!accept(now, last)) return;
+    last = now;
+    const info = keyInfo(code);
+    if (!info) return tick();
+    clearTimeout(hintTimer);
+    if (code !== q.code) {
+      // a wrong key still teaches: say what it was, then show where the right one is
+      q.wrong = true;
+      chime(PENTA[0]);
+      wiggle($('.stage'));
+      say([thatIs(info)]);
+      return hint();
+    }
+    me.know[code] = grade(me.know[code] || 0, q);
+    meet(code);
+    cheer();
+    burst();
+    put(info);
+    again($('.card'), 'pop');
+    document.querySelectorAll('.key.target').forEach(cap => cap.classList.remove('target'));
+    light(code);
+    voice(info, t('yes'));
+    last = now + 2500; // a longer stage for the celebration
+    later(ask, STAGE_MS + 2500);
+  };
+  ask();
+}
+
+// ---- mouse activities ----
+
+// The pointer is drawn big, and a little mouse on a mat copies the hand: it slides when the hand slides, its button lights when the finger clicks.
+const ptr = { x: innerWidth / 2, y: innerHeight / 2 };
+function mouseKit() {
+  const cur = el('div', { className: 'cursor', innerHTML: `<svg viewBox="10 4 38 48"><path d="${POINTER}"/></svg>` });
+  const toy = el('div', { className: 'mousey', innerHTML: '<svg viewBox="0 0 64 88"><path class="l" d="M32 4C17 4 6 14 6 30v6h26z"/><path class="r" d="M32 4c15 0 26 10 26 26v6H32z"/>' +
+    '<path d="M6 36h52v22c0 15-11 26-26 26S6 73 6 58z"/><rect x="28" y="12" width="8" height="16" rx="4"/></svg>' });
+  const place = e => {
+    if (e) { ptr.x = e.clientX; ptr.y = e.clientY; }
+    cur.style.translate = `${ptr.x}px ${ptr.y}px`;
+    toy.firstChild.style.translate = `${(ptr.x / innerWidth - .5) * 36}% ${(ptr.y / innerHeight - .5) * 36}%`;
+  };
+  scene.append(toy, cur);
+  place();
+  on(play, 'pointermove', place);
+  on(play, 'pointerdown', e => { place(e); cur.classList.add('down'); toy.classList.add(e.button === 2 ? 'right' : 'left'); });
+  on(window, 'pointerup', () => { cur.classList.remove('down'); toy.classList.remove('left', 'right'); });
+  on(play, 'contextmenu', e => e.preventDefault()); // any button is a click
+}
+// a click on nothing still answers, so the kid knows the click happened
+function miss() {
+  tick();
+  const node = el('div', { className: 'ripple' });
+  node.style.translate = `${ptr.x}px ${ptr.y}px`;
+  scene.append(node);
+  setTimeout(() => node.remove(), 450);
+}
+const photo = info => el('img', { src: info.img, alt: '' });
+const pageDone = (name, wait) => later(() => { cheer(); burst(); win(name); later(() => mount(name), 2600); }, wait);
+
+// Step 1, move: the hand moves, the lamp moves. Animals sleep in the dark and wake when the lamp finds them. No click needed.
+function startMove(first) {
+  const { n, size, light, dwell } = spec('move');
+  paint('var(--leaf)'); // the meadow, seen through the lamp
+  const dark = css(el('div', { className: 'dark' }), '--r', `${light}vmin`);
+  const places = shuffle([...Array(8).keys()]); // a 4 x 2 grid of hiding places
+  const sleepers = shuffle(LETTERS).slice(0, n).map((code, i) => {
+    const info = keyInfo(code), node = css(el('div', { className: 'sleeper' }, photo(info)), '--s', `${size}vmin`);
+    node.style.left = `${14 + (places[i] % 4) * 21 + rand(-2, 2)}%`;
+    node.style.top = `${32 + (places[i] >> 2) * 33 + rand(-4, 4)}%`;
+    scene.append(node);
+    return { info, node, since: 0, awake: false };
+  });
+  scene.append(dark);
+  mouseKit();
+  if (first) say([t('moveIt')]);
+  let found = 0, lastFound = -Infinity, moved = false;
+  const aim = () => { css(dark, '--x', `${ptr.x}px`); css(dark, '--y', `${ptr.y}px`); };
+  aim();
+  on(play, 'pointermove', () => { moved = true; aim(); });
+  on(play, 'pointerdown', aim);
+  const watch = setInterval(() => {
+    const now = performance.now();
+    if (!moved || found === n || !accept(now, lastFound)) return; // one animal at a time, like one key at a time
+    for (const s of sleepers) {
+      if (s.awake) continue;
+      const box = s.node.getBoundingClientRect();
+      const lit = Math.hypot(ptr.x - box.left - box.width / 2, ptr.y - box.top - box.height / 2) < box.width / 2 + vmin(light) * .3;
+      s.since = lit ? s.since || now : 0;
+      if (!lit || now - s.since < dwell) continue;
+      s.awake = true;
+      s.node.classList.add('awake');
+      lastFound = now;
+      meet(s.info.code);
+      chime(PENTA[found % PENTA.length]);
+      caption(s.info.name);
+      voice(s.info);
+      if (++found === n) later(() => { dark.classList.add('dawn'); caption(t('morning')); say([t('morning')]); pageDone('move', 600); }, STAGE_MS + 1200);
+      break;
+    }
+  }, 80);
+  cleanup.push(() => clearInterval(watch));
+}
+
+// Step 2, click: big keys hide an animal each. Aim, click, and it comes out. The keys get smaller and more numerous.
+function startClick(first) {
+  const { n, size } = spec('click');
+  paint('var(--sun)', NIGHT);
+  const flaps = css(el('div', { className: 'flaps' }), '--s', `${size}vmin`);
+  flaps.style.maxWidth = `${(n === 4 ? 2 : Math.min(n, 3)) * (size + 4.5)}vmin`;
+  const tint = Math.floor(rand(0, BG.length));
+  let opened = 0, last = -Infinity;
+  shuffle(LETTERS).slice(0, n).forEach((code, i) => {
+    const info = keyInfo(code), flap = css(el('button', { className: 'cap flap', tabIndex: -1 }, photo(info)), '--c', BG[(tint + i) % BG.length]);
+    flap.info = info;
+    flaps.append(flap);
+  });
+  scene.append(flaps);
+  mouseKit();
+  if (first) say([t('clickIt')]);
+  on(play, 'pointerdown', e => {
+    const flap = e.target.closest('.flap'), now = performance.now();
+    if (e.target.closest('#leave')) return;
+    if (!flap) return miss();
+    if (now - last < 600) return;
+    last = now;
+    if (!flap.classList.contains('open')) {
+      flap.classList.add('open');
+      meet(flap.info.code);
+      if (++opened === n) pageDone('click', STAGE_MS + 1400);
+    }
+    chime(PENTA[opened % PENTA.length]);
+    caption(flap.info.name);
+    voice(flap.info);
+  });
+}
+
+// Step 3, drag: press on the ball, keep pressing, carry it to the basket of its colour, let go.
+// A click without holding also works: the ball then sticks to the pointer until the next click. Holding comes with practice.
+function startDrag(first) {
+  const { n } = spec('drag');
+  paint('#e9e6f7', NIGHT);
+  const colours = shuffle(ROWS[0]).slice(0, n).map(keyInfo);
+  const shelf = el('div', { className: 'shelf' }, ...colours.map(info => Object.assign(css(el('div', { className: 'cap basket' }), '--c', info.bg), { info })));
+  const ball = el('div', { className: 'ball' });
+  scene.append(shelf, ball);
+  mouseKit();
+  let want, at, rest, grab = null, sticky = false, busy = true, served = 0;
+  const moveTo = (x, y, glide = false) => { at = { x, y }; ball.classList.toggle('glide', glide); ball.style.translate = `${x}px ${y}px`; };
+  const basketAt = () => [...shelf.children].find(b => {
+    const box = b.getBoundingClientRect(), m = box.width * .15;
+    return at.x > box.left - m && at.x < box.right + m && at.y > box.top - m * 2 && at.y < box.bottom + m;
+  });
+  function serve() {
+    want = colours[Math.floor(rand(0, n))];
+    css(ball, '--c', want.bg).className = 'ball';
+    rest = { x: innerWidth * rand(.2, .75), y: innerHeight * rand(.24, .4) };
+    moveTo(rest.x, rest.y);
+    again(ball, 'pop');
+    busy = false;
+    say([first && !served ? t('dragIt') : '', want.name]);
+  }
+  function drop() {
+    grab = null;
+    sticky = false;
+    ball.classList.remove('held');
+    const basket = basketAt();
+    for (const b of shelf.children) b.classList.remove('open');
+    if (!basket) return; // let go on the way: the ball waits where it is
+    if (basket.info !== want) {
+      // the wrong basket still teaches: say its colour, and the ball goes back
+      chime(PENTA[0]);
+      wiggle(basket);
+      say([thatIs(basket.info)]);
+      return moveTo(rest.x, rest.y, true);
+    }
+    busy = true;
+    const box = basket.getBoundingClientRect();
+    moveTo(box.left + box.width / 2, box.top + box.height * .3, true);
+    ball.classList.add('in');
+    chime(PENTA[2]);
+    setTimeout(() => chime(PENTA[4]), 120);
+    caption(want.name);
+    say([t('yes'), want.name]);
+    if (++served === 3) pageDone('drag', 1600); else later(serve, 1900);
+  }
+  on(play, 'pointerdown', e => {
+    if (busy || e.target.closest('#leave')) return;
+    if (sticky) return drop();
+    if (e.target !== ball) return miss();
+    grab = { dx: at.x - e.clientX, dy: at.y - e.clientY, x: e.clientX, y: e.clientY, t: performance.now() };
+    ball.classList.remove('glide');
+    ball.classList.add('held');
+    chime(PENTA[1], 0.15);
+  });
+  on(play, 'pointermove', e => {
+    if (!grab) return;
+    moveTo(e.clientX + grab.dx, e.clientY + grab.dy);
+    const over = basketAt();
+    for (const b of shelf.children) b.classList.toggle('open', b === over);
+  });
+  on(window, 'pointerup', e => {
+    if (!grab || sticky) return;
+    if (performance.now() - grab.t < 300 && Math.hypot(e.clientX - grab.x, e.clientY - grab.y) < 12) sticky = true; else drop();
+  });
+  later(serve, 300);
+}
+
+// Step 4, choose: the mouse is now a way to answer. An animal calls; click its photo.
+function startChoose(first) {
+  const { n } = spec('choose');
+  paint('var(--teal)');
+  const target = shuffle(LETTERS.filter(code => keyInfo(code).clip))[0], info = keyInfo(target);
+  const row = el('div', { className: 'choices' }, ...shuffle([target, ...shuffle(LETTERS.filter(code => code !== target)).slice(0, n - 1)]).map(code =>
+    Object.assign(el('button', { className: 'cap choice', tabIndex: -1 }, photo(keyInfo(code))), { info: keyInfo(code) })));
+  scene.append(el('button', { className: 'cap ear', tabIndex: -1, innerHTML: SOUND }), row);
+  mouseKit();
+  let done = false, last = -Infinity;
+  const call = intro => say(intro ? [t('who')] : [], () => playClip(info));
+  on(play, 'pointerdown', e => {
+    const choice = e.target.closest('.choice'), now = performance.now();
+    if (done || e.target.closest('#leave')) return;
+    if (e.target.closest('.ear')) return call(false);
+    if (!choice || choice.classList.contains('no')) return miss();
+    if (now - last < 700) return;
+    last = now;
+    if (choice.info.code !== target) {
+      // a wrong photo still teaches: say who that was, then play the call again
+      choice.classList.add('no');
+      chime(PENTA[0]);
+      wiggle(choice);
+      return say([thatIs(choice.info)], () => later(() => call(false), 400));
+    }
+    done = true;
+    choice.classList.add('yes');
+    row.classList.add('done');
+    meet(target);
+    caption(info.name);
+    cheer();
+    burst();
+    win('choose');
+    voice(info, t('yes'));
+    later(() => mount('choose'), 5200);
+  });
+  later(() => call(true), first ? 300 : 700);
+}
 
 // ---- input ----
 
-let started = false, last = -Infinity, lastInfo = null;
-function start() {
-  if (started) return;
-  started = true;
-  // Fullscreen + (Chrome/Edge) keyboard lock keep small hands inside the page.
-  Promise.resolve(document.documentElement.requestFullscreen?.()).then(() => navigator.keyboard?.lock?.()).catch(() => {});
-}
-
-function press(code, now) {
-  if (!accept(now, last)) return;
-  last = now;
-  const info = code === 'Space' ? lastInfo : keyInfo(code);
-  if (!info) { tick(); return; }
-  if (finding && info.code !== target.code) {
-    // a wrong key still teaches: say what it was, keep the question open
-    chime(PENTA[0]);
-    $('emoji').classList.add('wiggle');
-    $('photo').classList.add('wiggle');
-    setTimeout(() => { $('emoji').classList.remove('wiggle'); $('photo').classList.remove('wiggle'); }, 300);
-    say([info.name]);
-    return;
-  }
-  lastInfo = info;
-  if (finding) {
-    cheer();
-    show(info);
-    voice(info, FR ? 'Bravo !' : 'Yes!');
-    last = now + 2500; // a longer stage for the celebration
-    setTimeout(ask, STAGE_MS + 2500);
-  } else {
-    chime(PENTA[ROWS.flat().indexOf(info.code) % PENTA.length]);
-    show(info);
-    voice(info);
-  }
-}
-
 addEventListener('keydown', e => {
+  if (!act) return; // on the home page the keyboard belongs to the parent
   e.preventDefault(); // swallow tab, space-scroll, backspace, F-keys…
   if (e.repeat || e.metaKey || e.ctrlKey) return; // a held key is one press; leave shortcuts to the parent
-  start();
-  press(e.code, performance.now());
+  if (e.code === 'Escape') return holdStart();
+  if (onKey) onKey(e.code, performance.now()); else tick();
 });
+addEventListener('keyup', e => { if (e.code === 'Escape') holdEnd(); });
 
 addEventListener('beforeunload', e => {
-  if (!started) return;
+  if (!act) return;
   e.preventDefault();
   e.returnValue = '';
 });
 
-try { if (localStorage.mode === 'find') setMode(true); } catch {}
+renderHome();
 
 // ---- self-check: open index.html#test ----
 
 if (location.hash === '#test') {
   let failed = 0;
   const ok = (cond, msg) => { if (!cond) { failed++; console.error('FAIL', msg); } };
-  const letters = ROWS.slice(1).flat(), seen = new Set();
-  ok(letters.length === ANIMALS.length, 'one animal per letter key');
+  const seen = new Set();
+  ok(LETTERS.length === ANIMALS.length, 'one animal per letter key');
   ok(ROWS[0].length === COLORS.length, 'one colour per digit key');
-  for (const code of ROWS.flat()) {
+  for (const code of ALL) {
     const k = keyInfo(code);
     ok(k && k.emoji && k.name && k.bg, `${code} has an emoji, a name and a colour`);
     ok(!seen.has(k.emoji), `${code} has its own emoji`);
@@ -239,16 +815,31 @@ if (location.hash === '#test') {
     ok(JSON.stringify(k) === JSON.stringify(keyInfo(code)), `${code} is stable`);
   }
   ok(ROWS[0].every(code => keyInfo(code).sound === '' && !keyInfo(code).img), 'colours have no animal sound or photo');
-  ok(letters.every(code => keyInfo(code).sound && keyInfo(code).img), 'animals have a spoken sound and a photo');
+  ok(LETTERS.every(code => keyInfo(code).sound && keyInfo(code).img), 'animals have a spoken sound and a photo');
   ok([...CLIPS].every(a => ANIMALS.some(([, en]) => en === a)), 'every clip belongs to an animal');
   for (const code of ['Space', 'Enter', 'ArrowUp', 'Backquote', 'F5', '']) ok(keyInfo(code) === null, `${code} is not a toy key`);
   ok(accept(0, -Infinity) && accept(STAGE_MS, 0) && !accept(STAGE_MS - 1, 0), 'one press per stage');
-  ok(document.querySelectorAll('#keys span').length === ROWS.flat().length, 'mini keyboard has every toy key');
+  ok(mirror().querySelectorAll('.key').length === ALL.length, 'mini keyboard has every toy key');
+  // the learner
+  ok(INTRO.length === ALL.length && new Set(INTRO).size === ALL.length, 'every key is introduced exactly once');
+  ok(inPlay({}).length === START, 'find starts with three friends');
+  ok(inPlay({ [INTRO[0]]: KNOWN }).length === START + 1 && inPlay({ [INTRO[0]]: 1 }).length === START, 'a known key brings a new friend');
+  ok(inPlay(Object.fromEntries(ALL.map(code => [code, 3]))).length === ALL.length, 'in the end every key is in play');
+  for (let i = 0; i < 50; i++) ok(pick({}, INTRO[0]) !== INTRO[0] && inPlay({}).includes(pick({}, INTRO[0])), 'never the same question twice, always a key in play');
+  ok(pick({ [INTRO[0]]: 3 }, INTRO[2], () => 0.5) === INTRO[1], 'a key not known yet comes back more often');
+  ok(hintDelay(0) === 0 && [1, 2, 3].every(k => hintDelay(k) > hintDelay(k - 1)), 'help fades as a key is learned');
+  ok(grade(0, { wrong: false, hinted: true }) === 1 && grade(1, { wrong: false, hinted: true }) === 1, 'following the glow teaches a new key, not an old one');
+  ok(grade(1, { wrong: false, hinted: false }) === 2 && grade(3, { wrong: false, hinted: false }) === 3, 'found without help: one step up, three at most');
+  ok(grade(2, { wrong: true, hinted: true }) === 1 && grade(0, { wrong: true, hinted: true }) === 0, 'a wrong key first: one step down, never below zero');
+  ok(level(0, 2) === 1 && level(undefined, 2) === 1 && level(2, 2) === 2 && level(99, 2) === 3, 'mouse levels go from 1 to 3');
+  ok(Object.keys(LEVELS).every(name => ACTS[name]?.track === 'ms' && LEVELS[name].spec.length === 3), 'every mouse step has three levels');
+  ok(Object.values(TX).every(pair => pair.length === 2 && pair.every(Boolean)) && Object.values(ACTS).every(a => a.name.length === 2 && a.sub.length === 2), 'every word exists in both languages');
+  ok(the({ img: 'x', name: FR ? 'la vache' : 'cow' }) === (FR ? 'la vache' : 'the cow') && the({ img: '', name: 'orange' }) === (FR ? "l'orange" : 'orange'), 'articles');
   // every photo and clip must really exist next to this page
   const files = [...ANIMALS.map(([, en]) => `img/${en}.jpg`), ...[...CLIPS].map(a => `snd/${a}.mp3`)];
   Promise.all(files.map(f => fetch(f, { method: 'HEAD' }).then(r => ok(r.ok, `${f} exists`), () => ok(false, `${f} exists`)))).then(() => {
     document.title = failed ? `${failed} FAILED` : 'tests ok';
-    $('emoji').textContent = failed ? '❌' : '✅';
+    $('.tag').textContent = failed ? `❌ ${failed} failed, see the console` : '✅ tests ok';
   });
 }
 </script>
