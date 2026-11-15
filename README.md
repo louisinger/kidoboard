@@ -26,6 +26,7 @@ Every key is an animal or a colour. Real photos, real recordings, the name spoke
 - **Your voice.** Record the words yourself; your recording replaces the computer voice.
 - **Key stickers.** Print the pictures and stick them on the real keys.
 - **Progress** is kept in the browser only.
+- **Phones and tablets.** Everything can be played with a finger, upright or sideways. The mouse steps then work as touch games; the mouse itself is learned on a computer. iPhone and iPad have no full screen for web pages: use Share, then Add to Home Screen, and open Kidoboard from there to lose the browser bars.
 
 Self-check: open `index.html#test`.
 

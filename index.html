@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Kidoboard</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ffcc2e'/%3E%3Crect x='12' y='20' width='40' height='32' rx='9' fill='%23b4add9'/%3E%3Crect x='12' y='12' width='40' height='32' rx='9' fill='%23fff'/%3E%3C/svg%3E">
 <style>
@@ -14,7 +16,7 @@
   html, body { margin: 0; min-height: 100%; }
   body { background: var(--sun); color: var(--ink); }
   [hidden] { display: none !important; }
-  button { font: inherit; color: inherit; cursor: pointer; }
+  button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   button:focus-visible, a:focus-visible { outline: 4px solid var(--ink); outline-offset: 4px; }
 
   .cap { --c: #fff; --d: 8px; position: relative; border: 0; background: var(--c); border-radius: 18px;
@@ -58,7 +60,7 @@
 
   /* your voice: one tile per word, hold to record */
   .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 14px; margin: 18px 0 26px; padding-bottom: 8px; }
-  .tile { --d: 6px; padding: 8px 8px 10px; border-radius: 16px; font-size: 15px; font-weight: 800; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .tile { --d: 6px; padding: 8px 8px 10px; border-radius: 16px; font-size: 15px; font-weight: 800; touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
   .tile img, .tile span { display: block; width: 100%; aspect-ratio: 4 / 3; margin-bottom: 6px; border-radius: 10px; object-fit: cover; pointer-events: none; }
   .tile.has::after { content: ''; position: absolute; right: 10px; top: 10px; width: 16px; height: 16px; border-radius: 50%; background: var(--leaf); box-shadow: 0 0 0 3px #fff; }
   .tile.rec { --c: var(--tomato); color: #fff; }
@@ -80,7 +82,9 @@
 
   /* ---- play: one full-screen page per activity, sized in vmin so it fills any screen ---- */
   #play { --bg: var(--ink); --fg: #fff; position: fixed; inset: 0; overflow: hidden; background: var(--bg); color: var(--fg); transition: background .5s;
-          user-select: none; -webkit-user-select: none; touch-action: none; }
+          user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; }
+  #play img { pointer-events: none; }  /* a press that slides must not start dragging the photo */
+  #play.touch .cursor, #play.touch .mousey { display: none; }  /* a finger needs no arrow */
   #play.kb:not(.peek), #play.kb:not(.peek) *, #play.ms, #play.ms * { cursor: none; }
   #scene { position: absolute; inset: 0; box-sizing: border-box; display: grid; place-content: center; justify-items: center; gap: 5vmin; text-align: center; }
   #leave { --c: #fff; --d: .8vmin; position: absolute; left: 2vmin; top: 2vmin; z-index: 6; width: max(7vmin, 40px); height: max(7vmin, 40px); padding: 0; border-radius: 28%;
@@ -117,7 +121,8 @@
   .card.idle { display: grid; place-items: center; border: 0; background: none; box-shadow: none; overflow: visible; }
   .card.idle .blob { display: block; width: 22vmin; height: 22vmin; border-radius: 5vmin; background: #fff; box-shadow: 0 2.6vmin 0 #b4add9; animation: tap 1.5s infinite; }
   @keyframes tap { 30% { transform: translateY(2.6vmin); box-shadow: 0 0 0 #b4add9; } 55% { transform: none; } }
-  .card.asking { animation: pulse 1.6s ease-in-out infinite; }
+  .card.asking { animation: nod 1.6s ease-in-out infinite; }
+  @keyframes nod { 50% { transform: scale(1.04); } }
   /* a line for the grown-up: something to say or ask about what is on screen */
   .ask { min-height: 1.3em; margin: 0; max-width: 90vw; font-size: max(3vmin, 16px); font-weight: 700; line-height: 1.3; opacity: .92; }
   .ask svg { width: 1.1em; margin-right: .4em; vertical-align: -.2em; }
@@ -190,6 +195,17 @@
   .choice.yes { scale: 1.1; z-index: 1; }
   .choices.done .choice:not(.yes) { opacity: .2; }
   @media (max-aspect-ratio: 1/1) { .choices { --s: 40vmin; } .choices.two { --s: 44vmin; } }
+
+  @media (max-aspect-ratio: 1/1) {
+    .card { width: 82vw; height: 58vw; }
+    .card.colour { width: 58vw; }
+    .word { font-size: 13vmin; }
+    .ask { font-size: max(4.2vmin, 16px); }
+    .how { padding: 0 6vmin; font-size: max(3.6vmin, 15px); }
+    .mirror.big { --k: 8.6vw; grid-auto-rows: calc(var(--k) * 2.8); }
+    .choices.two { flex-direction: column; align-items: center; --s: min(72vw, 35vh); gap: 4vh; }  /* one above the other, as big as they fit */
+    .flaps { --s: min(var(--size), 42vw) !important; max-width: 96vw !important; }
+  }
 
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
@@ -335,6 +351,7 @@ const TX = {
           'Les petites mains commencent avec six grosses touches, chacune est la maison d’un animal. Réduisez les touches quand votre enfant grandit.'],
   ms: ['The mouse', 'La souris'],
   msSub: ['A mouse is hard before about three. Start with Move, your hand over theirs.', 'La souris est difficile avant trois ans environ. Commencez par Bouger, votre main sur la sienne.'],
+  msTouch: ['On this screen these are played with a finger. Fine for the games, but the mouse itself is learned on a computer.', 'Sur cet écran, ces jeux se jouent au doigt. Très bien pour jouer, mais la souris elle-même s’apprend sur un ordinateur.'],
   grain: ['Keys', 'Touches'], big: ['6 big keys', '6 grosses touches'], mid: ['12 keys', '12 touches'], all: ['Every key', 'Toutes les touches'],
   met: ['met', 'rencontrés'], words: ['words known', 'mots connus'], known: ['keys known', 'touches connues'], lvl: ['Level', 'Niveau'], of: ['of', 'sur'],
   grown: ['For grown-ups', 'Pour les grands'],
@@ -361,6 +378,7 @@ const TX = {
              'Découpez chaque image et collez-la sur la touche indiquée dessous. Pour le réglage « Toutes les touches » : un enfant retrouve une image bien plus facilement qu’une place.'],
   pressAny: ['Press a key', 'Appuie sur une touche'],
   pointHow: ['Touch the picture, or press any key on its side of the keyboard.', 'Touchez l’image, ou appuyez sur une touche de son côté du clavier.'],
+  pointTouch: ['Touch the picture.', 'Touchez l’image.'],
   yes: ['Yes!', 'Oui !'],
   moveIt: ['Move the mouse. Wake up the animals!', 'Bouge la souris. Réveille les animaux !'],
   morning: ['Good morning!', 'Bonjour !'],
@@ -470,6 +488,7 @@ const again = (node, cls) => { node.classList.remove(cls); void node.offsetWidth
 const ico = body => `<svg class="ico" viewBox="0 0 64 64" aria-hidden="true">${body}</svg>`;
 const photo = info => el('img', { src: info.img, alt: '' });
 const POINTER = 'M14 8v34l9-8 6 14 7-3-6-14h12z';
+const FINGERS = matchMedia('(hover: none)').matches; // a phone or a tablet: played with a finger, no mouse to learn here
 const BUBBLE = ico('<path d="M10 12h44v30H30L18 54V42h-8z"/>');
 
 // ---- the activities: three for the keyboard, then four steps for the mouse ----
@@ -516,7 +535,7 @@ const seg = (label, key, options) => `<div class="seg" role="group" aria-label="
 function renderHome() {
   document.documentElement.lang = FR ? 'fr' : 'en';
   if (view === 'voices') return renderVoices();
-  const track = (kind, extra = '') => `<section class="track"><h2>${t(kind)}</h2><p>${t(kind + 'Sub')}</p>${extra}<div class="row ${kind}">${
+  const track = (kind, extra = '') => `<section class="track"><h2>${t(kind)}</h2><p>${t(kind === 'ms' && FINGERS ? 'msTouch' : kind + 'Sub')}</p>${extra}<div class="row ${kind}">${
     Object.entries(ACTS).filter(([, a]) => a.track === kind).map(([name, a], i) =>
       `<button class="cap go" data-act="${name}" style="--c:var(--${a.color})"><span class="num">${i + 1}<em>${a.age[+FR]}</em></span>${ico(a.icon)}<strong>${a.name[+FR]}</strong>` +
       `<span class="sub">${a.sub[+FR]}</span><span class="prog">${progress(name)}</span></button>`).join('')}</div></section>`;
@@ -802,7 +821,7 @@ function startQuiz(first, mouse) {
     return Object.assign(el('button', { className: 'cap choice', tabIndex: -1 }, item.img ? photo(item) : css(el('div', { className: 'disc' }), '--c', item.bg)), { info: item });
   }));
   scene.append(el('button', { className: 'cap ear', tabIndex: -1, innerHTML: SOUND, hidden: !bySound }), row);
-  if (first && !mouse) scene.append(el('p', { className: 'how', textContent: t('pointHow') }));
+  if (first && !mouse) scene.append(el('p', { className: 'how', textContent: t(FINGERS ? 'pointTouch' : 'pointHow') }));
   if (mouse) mouseKit(); else peekKit();
   let done = false, wrong = false, last = -Infinity, openAt = Infinity;
   function ask() {
@@ -849,12 +868,14 @@ function startQuiz(first, mouse) {
 
 // The pointer is drawn big, and a little mouse on a mat copies the hand: it slides when the hand slides, its button lights when the finger clicks.
 const ptr = { x: innerWidth / 2, y: innerHeight / 2 };
+let touching = FINGERS;
 function mouseKit() {
   const cur = el('div', { className: 'cursor', innerHTML: `<svg viewBox="10 4 38 48"><path d="${POINTER}"/></svg>` });
   const toy = el('div', { className: 'mousey', innerHTML: '<svg viewBox="0 0 64 88"><path class="l" d="M32 4C17 4 6 14 6 30v6h26z"/><path class="r" d="M32 4c15 0 26 10 26 26v6H32z"/>' +
     '<path d="M6 36h52v22c0 15-11 26-26 26S6 73 6 58z"/><rect x="28" y="12" width="8" height="16" rx="4"/></svg>' });
   const place = e => {
-    if (e) { ptr.x = e.clientX; ptr.y = e.clientY; }
+    if (e) { ptr.x = e.clientX; ptr.y = e.clientY; touching = e.pointerType === 'touch'; }
+    play.classList.toggle('touch', touching);
     cur.style.translate = `${ptr.x}px ${ptr.y}px`;
     toy.firstChild.style.translate = `${(ptr.x / innerWidth - .5) * 36}% ${(ptr.y / innerHeight - .5) * 36}%`;
   };
@@ -935,7 +956,7 @@ function startMove(first) {
 function startClick(first) {
   const { n, size } = spec('click');
   paint('var(--sun)', NIGHT);
-  const flaps = css(el('div', { className: 'flaps' }), '--s', `${size}vmin`);
+  const flaps = css(css(el('div', { className: 'flaps' }), '--s', `${size}vmin`), '--size', `${size * 1.25}vmin`);
   flaps.style.maxWidth = `${(n === 4 ? 2 : Math.min(n, 3)) * (size + 4.5)}vmin`;
   const tint = Math.floor(rand(0, BG.length));
   let opened = 0, last = -Infinity;
